@@ -1,27 +1,35 @@
-import { ethers } from "hardhat";
+import { ethers } from "hardhat"
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
+import { ProjectFactory, TuneTogether } from "../typechain-types"
 
 async function main() {
-  const currentTimestampInSeconds = Math.round(Date.now() / 1000);
-  const unlockTime = currentTimestampInSeconds + 60;
+    const [owner]: HardhatEthersSigner[] = await ethers.getSigners()
 
-  const lockedAmount = ethers.parseEther("0.001");
+    /* ****************************************************************** */
+    /* **********           Deploy ProjectFactory           ************* */
+    /* ****************************************************************** */
+    const ProjectFactory = await ethers.getContractFactory("ProjectFactory");
+    const projectFactory: ProjectFactory = await ProjectFactory.connect(owner).deploy();
 
-  const lock = await ethers.deployContract("Lock", [unlockTime], {
-    value: lockedAmount,
-  });
+    await projectFactory.waitForDeployment()
+    const projectFactoryAddress = await projectFactory.getAddress()
 
-  await lock.waitForDeployment();
+    console.log(`ProjectFactory deployed to ${projectFactoryAddress}`);
 
-  console.log(
-    `Lock with ${ethers.formatEther(
-      lockedAmount
-    )}ETH and unlock timestamp ${unlockTime} deployed to ${lock.target}`
-  );
+
+    /* ****************************************************************** */
+    /* **********            Deploy TuneTogether            ************* */
+    /* ****************************************************************** */
+    const TuneTogether = await ethers.getContractFactory("TuneTogether")
+    const tuneTogether: TuneTogether = await TuneTogether.connect(owner).deploy(projectFactoryAddress)
+
+    await tuneTogether.waitForDeployment()
+    const tuneTogetherAddress = await tuneTogether.getAddress()
+    
+    console.log(`TuneTogether deployed to ${tuneTogetherAddress}`);
 }
 
-// We recommend this pattern to be able to use async/await everywhere
-// and properly handle errors.
 main().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
+  console.error("error => " + error)
+  process.exitCode = 1
 });
