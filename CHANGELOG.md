@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.3.0 (2023-07-10)
+
+### feat: Implement Mumbai deployement
+
+- Implement Mumbai deployement
+  - Change solidity version beacause an error occured in Mumbai (see [Invalid opcode: opcode 0x5f not defined](https://ethereum.stackexchange.com/questions/150281/invalid-opcode-opcode-0x5f-not-defined))
+  - Update/Add deploy scripts
+  - Update `hardhat.config`
+  - Update `.env` file
+- Add new feature on TuneTogether
+  - isArtist
+  - getArtist
+  - getOneProject
+---
+
 ## 0.2.0 (2023-07-10)
 
 ### feat: Basic implementation of smart contracts
