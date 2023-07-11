@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
 
-import "./ProjectFactory.sol";
+import "./CampaignFactory.sol";
 
 contract TuneTogether {
-    ProjectFactory private _projectFactory;
+    CampaignFactory private _campaignFactory;
 
-    struct Project {
+    struct Campaign {
         string name;
         string description;
         uint8 fees;
@@ -19,17 +19,17 @@ contract TuneTogether {
     }
 
     mapping(address => Artist) artists;
-    mapping(address => Project) projects;
+    mapping(address => Campaign) campaigns;
 
     event ArtistCreated(address _artistAddr);
 
-    constructor(address _projectFactoryAddress) {
-        _projectFactory = ProjectFactory(_projectFactoryAddress);
+    constructor(address _campaignFactoryAddress) {
+        _campaignFactory = CampaignFactory(_campaignFactoryAddress);
     }
 
-    function createNewProject(string memory _projectName, string memory _description, uint8 _fees, string memory _artistName, string memory _bio, string memory _uri) external {
-        address _projectAddr = _projectFactory.createArtistProject(_uri, msg.sender, _projectName, _fees, _description);
-        _setProject(_projectAddr, _projectName, _fees, _description);
+    function createNewCampaign(string memory _campaignName, string memory _description, uint8 _fees, string memory _artistName, string memory _bio, string memory _uri) external {
+        address _campaignAddr = _campaignFactory.createCrowdfundingCampaign(_uri, msg.sender, _campaignName, _fees, _description);
+        _setCampaign(_campaignAddr, _campaignName, _fees, _description);
 
         if (bytes(artists[msg.sender].name).length == 0) {
             _setArtist(_artistName, _bio, _fees);
@@ -44,8 +44,8 @@ contract TuneTogether {
         return artists[_addr];
     }
 
-    function getOneProject(address _addr) external view returns (Project memory _projects) {
-        return projects[_addr];
+    function getOneCampaign(address _addr) external view returns (Campaign memory _campaigns) {
+        return campaigns[_addr];
     }
 
     function _setArtist(string memory _name, string memory _bio, uint8 _feeSchedule) private {
@@ -57,8 +57,8 @@ contract TuneTogether {
         emit ArtistCreated(msg.sender);
     }
 
-    function _setProject(address _addr, string memory _name, uint8 _fees, string memory _description) private {
-        Project memory project = Project(_name, _description, _fees);
-        projects[_addr] = project;
+    function _setCampaign(address _addr, string memory _name, uint8 _fees, string memory _description) private {
+        Campaign memory campaign = Campaign(_name, _description, _fees);
+        campaigns[_addr] = campaign;
     }
 }

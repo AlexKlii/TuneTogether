@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.4.1 (2023-07-11)
+
+### feat: Refactoring
+
+- Create Fixture interfaces for test
+- Update `README.md` with Unit Test section
+- Rename `ArtistProject` to `CrowdfundingCampaign` 
+- Rename `ProjectFactory` to `CampaignFactory` 
+---
+
 ## 0.4.0 (2023-07-11)
 
 ### feat: Implement Test

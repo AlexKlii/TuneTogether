@@ -1,6 +1,6 @@
 import { ethers } from 'hardhat'
 import { HardhatEthersSigner } from '@nomicfoundation/hardhat-ethers/signers'
-import { ArtistProject, ProjectFactory, TuneTogether } from '../typechain-types'
+import { CrowdfundingCampaign, CampaignFactory, TuneTogether } from '../typechain-types'
 
 async function main() {
   let [owner, artist, investor]: HardhatEthersSigner[] = await ethers.getSigners()
@@ -10,32 +10,32 @@ async function main() {
   if (!investor) investor = owner
 
   /* ****************************************************************** */
-  /* **********           Deploy ProjectFactory           ************* */
+  /* **********           Deploy CampaignFactory          ************* */
   /* ****************************************************************** */
-  const ProjectFactory = await ethers.getContractFactory('ProjectFactory')
-  const projectFactory: ProjectFactory = await ProjectFactory.connect(owner).deploy()
+  const CampaignFactory = await ethers.getContractFactory('CampaignFactory')
+  const campaignFactory: CampaignFactory = await CampaignFactory.connect(owner).deploy()
 
-  await projectFactory.waitForDeployment()
-  const projectFactoryAddress = await projectFactory.getAddress()
+  await campaignFactory.waitForDeployment()
+  const campaignFactoryAddress = await campaignFactory.getAddress()
 
-  console.log(`ProjectFactory deployed to ${projectFactoryAddress}`)
+  console.log(`CampaignFactory deployed to ${campaignFactoryAddress}`)
 
   /* ****************************************************************** */
   /* **********                Lisen Event                ************* */
   /* ****************************************************************** */
-  const filter = projectFactory.filters['ArtistProjectCreated(address,address,uint256)']
-  projectFactory.on(filter, async (artistAddr, projectAddr) => {
-    console.log(`ArtistProject deployed to ${projectAddr} by ${artistAddr}`)
+  const filter = campaignFactory.filters['CrowdfundingCampaignCreated(address,address,uint256)']
+  campaignFactory.on(filter, async (artistAddr, campaignAddr) => {
+    console.log(`CrowdfundingCampaign deployed to ${campaignAddr} by ${artistAddr}`)
 
     /* ****************************************************************** */
     /* **********               Mint some NFT               ************* */
     /* ****************************************************************** */
-    const artistProject: ArtistProject = await ethers.getContractAt('ArtistProject', projectAddr)
+    const crowdfundingCampaign: CrowdfundingCampaign = await ethers.getContractAt('CrowdfundingCampaign', campaignAddr)
 
-    await artistProject.connect(investor).mint(1, 5)
-    await artistProject.connect(investor).mint(2, 1)
-    await artistProject.connect(investor).mint(3, 2)
-    await artistProject.connect(investor).mint(4, 1)
+    await crowdfundingCampaign.connect(investor).mint(1, 5)
+    await crowdfundingCampaign.connect(investor).mint(2, 1)
+    await crowdfundingCampaign.connect(investor).mint(3, 2)
+    await crowdfundingCampaign.connect(investor).mint(4, 1)
 
     console.log(`Mint some NFTs with address: ${investor.address}`)
     process.exit(0)
@@ -45,7 +45,7 @@ async function main() {
   /* **********            Deploy TuneTogether            ************* */
   /* ****************************************************************** */
   const TuneTogether = await ethers.getContractFactory('TuneTogether')
-  const tuneTogether: TuneTogether = await TuneTogether.connect(owner).deploy(projectFactoryAddress)
+  const tuneTogether: TuneTogether = await TuneTogether.connect(owner).deploy(campaignFactoryAddress)
 
   await tuneTogether.waitForDeployment()
   const tuneTogetherAddress = await tuneTogether.getAddress()
@@ -53,11 +53,11 @@ async function main() {
   console.log(`TuneTogether deployed to ${tuneTogetherAddress}`)
 
   /* ****************************************************************** */
-  /* **********          Deploy an ArtistProject          ************* */
+  /* **********       Deploy a CrowdfundingCampaign       ************* */
   /* ****************************************************************** */
-  const tx = await tuneTogether.connect(artist).createNewProject(
-    'GENESIS Project',
-    'The Gensis TuneTogether Project',
+  const tx = await tuneTogether.connect(artist).createNewCampaign(
+    'GENESIS Campaign',
+    'The Gensis TuneTogether Crowfunding Campaign',
     0,
     'TuneTogether',
     'TuneTogether Artist bio',

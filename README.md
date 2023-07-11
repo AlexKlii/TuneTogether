@@ -15,6 +15,17 @@ DApp and smart contract created by Alexandre Caliaro
 - Wagmi
 - Typescript
 
+### Prerequisites
+
+Rename the `.env.example` files to `.env` in the `frontend` and `backend` folders. Then fill in your local environment variables.
+
+By default, the hardhat test network is enabled.
+To disable it, modify this value in `frontend/.env`:
+
+```shell
+NEXT_PUBLIC_ENABLE_TESTNETS=false
+```
+
 ----
 ## DEV Installation
 ----
@@ -27,8 +38,28 @@ Run this command from the `frontend` and `backend` directories:
 npm install
 ```
 
-### Launch the project locally
+### Unit Test
 
+#### Compile project
+```shell
+npx hardhat compile
+```
+
+#### Run Unit Test
+
+Open a terminal and run the following command from the `backend` directory:
+
+* Simple usage
+```shell
+npx hardhat test
+```
+
+* With code coverage
+```shell
+npx hardhat coverage
+```
+
+### Launch the project locally
 
 Open a terminal and run the following command from the `backend` directory:
 
@@ -44,10 +75,9 @@ cd backend
 # If you're in the development environment
 npx hardhat run --network localhost scripts/deploy.ts
 
-# If you're in the test environment (Sepolia)
-npx hardhat run --network sepolia scripts/deploy.ts
+# If you're in the test environment (Mumbai)
+npx hardhat run --network mumbai scripts/deploy.ts
 ```
-
 
 Modify your `.env` file in the `backend` directory with your local environment variables based on the network you have chosen.
 
