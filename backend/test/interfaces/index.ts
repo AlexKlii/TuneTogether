@@ -3,6 +3,8 @@ import { CrowdfundingCampaign, CampaignFactory, TuneTogether } from "../../typec
 
 export interface CrowdfundingCampaignFixture {
     owner: HardhatEthersSigner
+    artist: HardhatEthersSigner
+    investor: HardhatEthersSigner
     crowdfundingCampaign: CrowdfundingCampaign
 }
 

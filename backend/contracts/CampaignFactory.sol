@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
 
-import "./CrowdfundingCampaign.sol";
+import './CrowdfundingCampaign.sol';
 
 contract CampaignFactory {
     event CrowdfundingCampaignCreated(address _artistAddr, address _campaignAddress, uint _timestamp);
