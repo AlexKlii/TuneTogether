@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
 
-import "./CampaignFactory.sol";
+import './CampaignFactory.sol';
 
 contract TuneTogether {
     CampaignFactory private _campaignFactory;
@@ -28,6 +28,14 @@ contract TuneTogether {
     }
 
     function createNewCampaign(string memory _campaignName, string memory _description, uint8 _fees, string memory _artistName, string memory _bio, string memory _uri) external {
+        require(bytes(_campaignName).length >= 5, 'Campaign name too short');
+        require(bytes(_campaignName).length <= 20, 'Campaign name too long');
+        require(bytes(_description).length >= 10, 'Campaign description too short');
+        require(_fees == 0 || _fees == 5 ||_fees == 10, 'Wrong fees');
+        require(bytes(_artistName).length >= 5, 'Artist name too short');
+        require(bytes(_artistName).length <= 20, 'Artist name too long');
+        require(bytes(_bio).length >= 10, 'Artist bio too short');
+
         address _campaignAddr = _campaignFactory.createCrowdfundingCampaign(_uri, msg.sender, _campaignName, _fees, _description);
         _setCampaign(_campaignAddr, _campaignName, _fees, _description);
 

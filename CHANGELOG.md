@@ -1,27 +1,39 @@
 # Changelog
 
-## 0.4.1 (2023-07-11)
+## 0.5.0 (2023-07-11)
 
-### feat: Refactoring
+### feat: Implement Requirements
 
-- Create Fixture interfaces for test
-- Update `README.md` with Unit Test section
-- Rename `ArtistProject` to `CrowdfundingCampaign` 
-- Rename `ProjectFactory` to `CampaignFactory` 
----
-
-## 0.4.0 (2023-07-11)
-
-### feat: Implement Test
-
-- Implement basic tests for all contracts
-- Update `bug_report` issue template
-- Update `ArtistCreated` event
+- Implement Requirements for `createNewCampaign` method in `TuneTogether` contract
+- Implement Requirements for methods in `CrowdfundingCampaign` contract
+- Implement new method in `CrowdfundingCampaign` contract
+  - startCampaign
+  - closeCampaign
+  - updateCampaignInfo
 ---
 
 <details>
   <summary>See old changelog</summary>
 
+  ## 0.4.1 (2023-07-11)
+
+  ### feat: Refactoring
+
+  - Create Fixture interfaces for test
+  - Update `README.md` with Unit Test section
+  - Rename `ArtistProject` to `CrowdfundingCampaign` 
+  - Rename `ProjectFactory` to `CampaignFactory` 
+  ---
+
+  ## 0.4.0 (2023-07-11)
+
+  ### feat: Implement Test
+
+  - Implement basic tests for all contracts
+  - Update `bug_report` issue template
+  - Update `ArtistCreated` event
+  ---
+  
   ## 0.3.0 (2023-07-10)
 
   ### feat: Implement Mumbai deployement
@@ -35,6 +47,16 @@
     - isArtist
     - getArtist
     - getOneProject
+  ---
+
+  ## 0.2.1 (2023-07-10)
+
+  ### feat: Add Github Issue template
+
+  - Add Github Issue template
+    - A bug report template: `bug_report.md`
+    - A feature request template: `feature_request.md`
+
   ---
 
   ## 0.2.0 (2023-07-10)
