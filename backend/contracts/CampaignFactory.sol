@@ -6,11 +6,11 @@ import './CrowdfundingCampaign.sol';
 contract CampaignFactory {
     event CrowdfundingCampaignCreated(address _artistAddr, address _campaignAddress, uint _timestamp);
 
-    function createCrowdfundingCampaign(string memory _uri, address _artistAddr, string memory _name, uint8 _fees, string memory _description) external returns (address campaignAddress) {
+    function createCrowdfundingCampaign(string memory _uri, address _artistAddr, string memory _name, uint8 _fees, string memory _description, uint8 _nbTiers) external returns (address campaignAddress) {
         bytes32 salt = keccak256(abi.encodePacked(_uri, _artistAddr));
         bytes memory campaignBytecode = abi.encodePacked(
             type(CrowdfundingCampaign).creationCode,
-            abi.encode(_uri, _artistAddr, _name, _fees, _description)
+            abi.encode(_uri, _artistAddr, _name, _fees, _description, _nbTiers)
         );
 
         assembly {

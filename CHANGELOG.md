@@ -1,19 +1,30 @@
 # Changelog
 
-## 0.5.0 (2023-07-11)
+## 0.6.0 (2023-07-11)
 
-### feat: Implement Requirements
+### feat: Implement Tier Prices
 
-- Implement Requirements for `createNewCampaign` method in `TuneTogether` contract
-- Implement Requirements for methods in `CrowdfundingCampaign` contract
-- Implement new method in `CrowdfundingCampaign` contract
-  - startCampaign
-  - closeCampaign
-  - updateCampaignInfo
+- Implement new method `setTierPrice` in `CrowfundingCampaign` contract
+- Update `createNewCampaign` method requirements in `TuneTogether` contract
+- Update `startCampaign` method requirements in `CrowfundingCampaign` contract
+- Update `mint` method requirements in `CrowfundingCampaign` contract
+- Update tests
 ---
 
 <details>
   <summary>See old changelog</summary>
+
+  ## 0.5.0 (2023-07-11)
+
+  ### feat: Implement Requirements
+
+  - Implement requirements for `createNewCampaign` method in `TuneTogether` contract
+  - Implement requirements for methods in `CrowdfundingCampaign` contract
+  - Implement new method in `CrowdfundingCampaign` contract
+    - startCampaign
+    - closeCampaign
+    - updateCampaignInfo
+  ---
 
   ## 0.4.1 (2023-07-11)
 

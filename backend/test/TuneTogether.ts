@@ -3,7 +3,7 @@ import { expect } from 'chai'
 import { ethers } from 'hardhat'
 import { HardhatEthersSigner } from '@nomicfoundation/hardhat-ethers/signers'
 import { loadFixture } from '@nomicfoundation/hardhat-toolbox/network-helpers'
-import { artistName, baseUri, bio, description, fees, campaignName } from './constants'
+import { artistName, baseUri, bio, description, fees, campaignName, nbTiers } from './constants'
 import { TuneTogetherFixture } from './interfaces'
 
 describe('TuneTogether', () => {
@@ -37,7 +37,8 @@ describe('TuneTogether', () => {
         0,
         artistName,
         bio,
-        baseUri
+        baseUri,
+        nbTiers
       )).to.emit(campaignFactory, 'CrowdfundingCampaignCreated')
 
       // Create campaign with 5% fees
@@ -47,7 +48,8 @@ describe('TuneTogether', () => {
         5,
         artistName,
         bio,
-        baseUri
+        baseUri,
+        nbTiers
       )).to.emit(campaignFactory, 'CrowdfundingCampaignCreated')
 
       // Create campaign with 10% fees
@@ -57,7 +59,8 @@ describe('TuneTogether', () => {
         10,
         artistName,
         bio,
-        baseUri
+        baseUri,
+        nbTiers
       )).to.emit(campaignFactory, 'CrowdfundingCampaignCreated')
     })
 
@@ -69,7 +72,8 @@ describe('TuneTogether', () => {
         fees,
         artistName,
         bio,
-        baseUri
+        baseUri,
+        nbTiers
       )).to.emit(tuneTogether, 'ArtistCreated').withArgs(artist.address)
     })
 
@@ -81,7 +85,8 @@ describe('TuneTogether', () => {
         fees,
         artistName,
         bio,
-        baseUri
+        baseUri,
+        nbTiers
       )
 
       expect(await tuneTogether.isArtist(artist.address)).to.be.equal(true)
@@ -106,10 +111,11 @@ describe('TuneTogether', () => {
         fees,
         artistName,
         bio,
-        baseUri
+        baseUri,
+        nbTiers
       )
 
-      // @TODO: Retrive `campaignAddr` from event emitted
+      // @TODO: Retrieve `campaignAddr` from event emitted
       // expect(await tuneTogether.getOneCampaign(campaignAddr)).to.deep.equal([
       //   campaignName,
       //   description,
@@ -126,7 +132,8 @@ describe('TuneTogether', () => {
         fees,
         artistName,
         bio,
-        baseUri
+        baseUri,
+        nbTiers
       )).to.be.revertedWith('Campaign name too short')
     })
 
@@ -139,7 +146,8 @@ describe('TuneTogether', () => {
         fees,
         artistName,
         bio,
-        baseUri
+        baseUri,
+        nbTiers
       )).to.be.revertedWith('Campaign name too long')
     })
 
@@ -152,7 +160,8 @@ describe('TuneTogether', () => {
         fees,
         artistName,
         bio,
-        baseUri
+        baseUri,
+        nbTiers
       )).to.be.revertedWith('Campaign description too short')
     })
 
@@ -165,7 +174,8 @@ describe('TuneTogether', () => {
         42,
         artistName,
         bio,
-        baseUri
+        baseUri,
+        nbTiers
       )).to.be.revertedWith('Wrong fees')
     })
     
@@ -178,7 +188,8 @@ describe('TuneTogether', () => {
         fees,
         'S',
         bio,
-        baseUri
+        baseUri,
+        nbTiers
       )).to.be.revertedWith('Artist name too short')
     })
 
@@ -191,7 +202,8 @@ describe('TuneTogether', () => {
         fees,
         'This Artist name is really long',
         bio,
-        baseUri
+        baseUri,
+        nbTiers
       )).to.be.revertedWith('Artist name too long')
     })
 
@@ -204,7 +216,8 @@ describe('TuneTogether', () => {
         fees,
         artistName,
         'S',
-        baseUri
+        baseUri,
+        nbTiers
       )).to.be.revertedWith('Artist bio too short')
     })
 
@@ -216,7 +229,8 @@ describe('TuneTogether', () => {
         fees,
         artistName,
         bio,
-        baseUri
+        baseUri,
+        nbTiers
       )
 
       await expect(await tuneTogether.connect(artist).createNewCampaign(
@@ -225,8 +239,37 @@ describe('TuneTogether', () => {
         fees,
         artistName,
         bio,
-        baseUri
+        baseUri,
+        nbTiers
       )).to.not.emit(tuneTogether, 'ArtistCreated')
     })
+  })
+
+  it('Revert if not enough tiers', async () => {
+    const { tuneTogether } = await loadFixture(deployFixture)
+
+    await expect(tuneTogether.createNewCampaign(
+      campaignName,
+      description,
+      fees,
+      artistName,
+      bio,
+      baseUri,
+      0
+    )).to.be.revertedWith('Not enough tier prices')
+  })
+
+  it('Revert if not enough tiers', async () => {
+    const { tuneTogether } = await loadFixture(deployFixture)
+
+    await expect(tuneTogether.createNewCampaign(
+      campaignName,
+      description,
+      fees,
+      artistName,
+      bio,
+      baseUri,
+      42
+    )).to.be.revertedWith('Too many tier prices')
   })
 })
