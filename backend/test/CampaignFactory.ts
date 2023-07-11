@@ -3,7 +3,7 @@ import { expect } from 'chai'
 import { ethers } from 'hardhat'
 import { HardhatEthersSigner } from '@nomicfoundation/hardhat-ethers/signers'
 import { loadFixture } from '@nomicfoundation/hardhat-toolbox/network-helpers'
-import { baseUri, description, fees, campaignName } from './constants'
+import { baseUri, description, fees, campaignName, nbTiers } from './constants'
 import { CampaignFactoryFixture } from './interfaces'
 
 describe('CampaignFactory', () => {
@@ -23,7 +23,8 @@ describe('CampaignFactory', () => {
         owner.address,
         campaignName,
         fees,
-        description
+        description,
+        nbTiers
       )).to.emit(campaignFactory, 'CrowdfundingCampaignCreated')
     })
   })

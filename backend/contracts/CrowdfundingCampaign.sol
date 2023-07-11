@@ -11,15 +11,20 @@ contract CrowdfundingCampaign is ERC1155, ERC1155Burnable, ERC1155Supply {
     uint256 private _endTimestamp;
     bool    private _campaignStarted;
     bool    private _campaignInProgress;
+    uint8   private _nbFilledTiers;
 
     string  public name;
     string  public description;
     uint8   public fees;
     address public artistAddress;
+    uint8   public nbTiers;
+
+    mapping(uint8 => uint) tierPrices;
 
     event CampaignStarted(uint256 _startTimestamp, uint256 _endTimestamp);
     event CampaignClosed(uint256 _endTimestamp);
-    event CampaignInfoUpdated(string name, string description, uint8 fees);
+    event CampaignInfoUpdated(string _name, string _description, uint8 _fees);
+    event TierPriceAdded(uint8 _id, uint _price);
 
     modifier onlyArtist() {
         require(artistAddress == msg.sender, 'You\'re not the campaign artist');
@@ -38,15 +43,17 @@ contract CrowdfundingCampaign is ERC1155, ERC1155Burnable, ERC1155Supply {
         _;
     }
 
-    constructor(string memory baseUri_, address _artistAddr, string memory _name, uint8 _fees, string memory _description) ERC1155(baseUri_) {
+    constructor(string memory baseUri_, address _artistAddr, string memory _name, uint8 _fees, string memory _description, uint8 _nbTiers) ERC1155(baseUri_) {
         _baseUri = baseUri_;
         artistAddress = _artistAddr;
         name = _name;
         fees = _fees;
         description = _description;
+        nbTiers = _nbTiers;
     }
 
-    function mint(uint256 _id, uint256 _amount) public campaignInProgress {
+    function mint(uint8 _id, uint256 _amount) public campaignInProgress payable {
+        require(msg.value == _amount * tierPrices[_id], 'Wrong value');
         _mint(msg.sender, _id, _amount, '');
     }
 
@@ -55,6 +62,8 @@ contract CrowdfundingCampaign is ERC1155, ERC1155Burnable, ERC1155Supply {
     }
 
     function startCampaign() external onlyArtist campaignNotStarted {
+        require(nbTiers == _nbFilledTiers, 'Missing tier prices');
+
         uint256 _startTimestamp = block.timestamp;
 
         _endTimestamp = _startTimestamp + 8 weeks;
@@ -73,13 +82,31 @@ contract CrowdfundingCampaign is ERC1155, ERC1155Burnable, ERC1155Supply {
         require(bytes(_name).length >= 5, 'Name too short');
         require(bytes(_name).length <= 20, 'Name too long');
         require(bytes(_description).length >= 10, 'Description too short');
-        require(_fees == 0 || _fees == 5 ||_fees == 10, 'Wrong fees option');
+        require(_fees == 0 || _fees == 5 || _fees == 10, 'Wrong fees option');
 
         description = _description;
         name = _name;
         fees = _fees;
 
         emit CampaignInfoUpdated(name, description, fees);
+    }
+
+    function setTierPrice(uint8 _id, uint _price) external onlyArtist campaignNotStarted {
+        require(_id > 0 && _id <= nbTiers, 'Tier does not exist');
+        require(_price > 0.00001 ether, 'Price too low');
+
+        if (_id > 1) {
+            require(_price > tierPrices[_id - 1], 'Price should be higher than the previous tier');
+        }
+
+        if (_id < nbTiers && tierPrices[_id + 1] != 0) {
+            require((_price < tierPrices[_id + 1]), 'Price should be lower than the next tier');
+        }
+
+        tierPrices[_id] = _price;
+        _nbFilledTiers = _nbFilledTiers + 1;
+
+        emit TierPriceAdded(_id, _price);
     }
 
     // The following functions are overrides required by Solidity.
