@@ -8,7 +8,7 @@ import "../node_modules/@openzeppelin/contracts/token/ERC1155/extensions/ERC1155
 import "../node_modules/@openzeppelin/contracts/utils/Counters.sol";
 import "../node_modules/@openzeppelin/contracts/utils/Strings.sol";
 
-contract ArtistProject is ERC1155, Ownable, ERC1155Burnable, ERC1155Supply {
+contract CrowdfundingCampaign is ERC1155, Ownable, ERC1155Burnable, ERC1155Supply {
     string  private _baseUri;
 
     string  public name;
@@ -33,7 +33,7 @@ contract ArtistProject is ERC1155, Ownable, ERC1155Burnable, ERC1155Supply {
     }
 
     // The following functions are overrides required by Solidity.
-    function _beforeTokenTransfer(address _operator,address _from,address _to,uint256[] memory _ids,uint256[] memory _amounts,bytes memory _data) internal override(ERC1155, ERC1155Supply) {
+    function _beforeTokenTransfer(address _operator, address _from, address _to, uint256[] memory _ids, uint256[] memory _amounts, bytes memory _data) internal override(ERC1155, ERC1155Supply) {
         super._beforeTokenTransfer(_operator,_from,_to,_ids,_amounts,_data);
     }
 }
