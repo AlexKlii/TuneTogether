@@ -10,6 +10,8 @@ export interface CrowdfundingCampaignFixture {
 
 export interface CampaignFactoryFixture {
     owner: HardhatEthersSigner
+    artist: HardhatEthersSigner
+    tuneTogetherContract: HardhatEthersSigner
     campaignFactory: CampaignFactory
 }
 
