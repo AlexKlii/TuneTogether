@@ -26,6 +26,8 @@ async function main() {
   await tuneTogether.waitForDeployment()
   const tuneTogetherAddress = await tuneTogether.getAddress()
 
+  await campaignFactory.setOwnerContractAddr(tuneTogetherAddress)
+
   console.log(`TuneTogether deployed to ${tuneTogetherAddress}`)
 }
 

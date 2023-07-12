@@ -12,6 +12,7 @@ contract CrowdfundingCampaign is ERC1155, ERC1155Burnable, ERC1155Supply {
     bool    private _campaignStarted;
     bool    private _campaignInProgress;
     uint8   private _nbFilledTiers;
+    address private _tuneTogetherAddr;
 
     string  public name;
     string  public description;
@@ -25,6 +26,11 @@ contract CrowdfundingCampaign is ERC1155, ERC1155Burnable, ERC1155Supply {
     event CampaignClosed(uint256 _endTimestamp);
     event CampaignInfoUpdated(string _name, string _description, uint8 _fees);
     event TierPriceAdded(uint8 _id, uint _price);
+
+    modifier isContractOwner() {
+        require(_tuneTogetherAddr == msg.sender, 'You\'re not the owner');
+        _;
+    }
 
     modifier onlyArtist() {
         require(artistAddress == msg.sender, 'You\'re not the campaign artist');
@@ -43,8 +49,9 @@ contract CrowdfundingCampaign is ERC1155, ERC1155Burnable, ERC1155Supply {
         _;
     }
 
-    constructor(string memory baseUri_, address _artistAddr, string memory _name, uint8 _fees, string memory _description, uint8 _nbTiers) ERC1155(baseUri_) {
+    constructor(string memory baseUri_, address tuneTogetherAddr_, address _artistAddr, string memory _name, uint8 _fees, string memory _description, uint8 _nbTiers) ERC1155(baseUri_) {
         _baseUri = baseUri_;
+        _tuneTogetherAddr = tuneTogetherAddr_;
         artistAddress = _artistAddr;
         name = _name;
         fees = _fees;
@@ -78,7 +85,7 @@ contract CrowdfundingCampaign is ERC1155, ERC1155Burnable, ERC1155Supply {
         emit CampaignClosed(block.timestamp);
     }
 
-    function updateCampaignInfo(string memory _name, string memory _description, uint8 _fees) external onlyArtist campaignNotStarted {
+    function updateCampaignInfo(string memory _name, string memory _description, uint8 _fees) external isContractOwner campaignNotStarted {
         require(bytes(_name).length >= 5, 'Name too short');
         require(bytes(_name).length <= 20, 'Name too long');
         require(bytes(_description).length >= 10, 'Description too short');
@@ -93,7 +100,7 @@ contract CrowdfundingCampaign is ERC1155, ERC1155Burnable, ERC1155Supply {
 
     function setTierPrice(uint8 _id, uint _price) external onlyArtist campaignNotStarted {
         require(_id > 0 && _id <= nbTiers, 'Tier does not exist');
-        require(_price > 0.00001 ether, 'Price too low');
+        require(_price >= 0.00001 ether, 'Price too low');
 
         if (_id > 1) {
             require(_price > tierPrices[_id - 1], 'Price should be higher than the previous tier');

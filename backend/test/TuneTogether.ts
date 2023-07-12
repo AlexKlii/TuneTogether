@@ -42,7 +42,7 @@ describe('TuneTogether', () => {
         bio,
         baseUri,
         nbTiers
-      )).to.emit(campaignFactory, 'CrowdfundingCampaignCreated')
+      )).to.emit(tuneTogether, 'CampaignAdded')
 
       // Create campaign with 5% fees
       await expect(tuneTogether.createNewCampaign(
@@ -53,7 +53,7 @@ describe('TuneTogether', () => {
         bio,
         baseUri,
         nbTiers
-      )).to.emit(campaignFactory, 'CrowdfundingCampaignCreated')
+      )).to.emit(tuneTogether, 'CampaignAdded')
 
       // Create campaign with 10% fees
       await expect(tuneTogether.createNewCampaign(
@@ -64,7 +64,7 @@ describe('TuneTogether', () => {
         bio,
         baseUri,
         nbTiers
-      )).to.emit(campaignFactory, 'CrowdfundingCampaignCreated')
+      )).to.emit(tuneTogether, 'CampaignAdded')
     })
 
     it('Should emit ArtistCreated', async () => {
@@ -100,30 +100,35 @@ describe('TuneTogether', () => {
       ])
     })
 
-    it('Should get an empty campaign', async () => {
-      const { tuneTogether } = await loadFixture(deployFixture)
-      expect(await tuneTogether.getOneCampaign('0x0000000000000000000000000000000000000000')).to.deep.equal(['','',BigInt(0)])
-    })
-
     it('Should get one campaign', async () => {
-      const { tuneTogether } = await loadFixture(deployFixture)
+      const { tuneTogether, artist } = await loadFixture(deployFixture)
 
-      await tuneTogether.createNewCampaign(
+      const tx = await tuneTogether.connect(artist).createNewCampaign(
         campaignName,
         description,
-        fees,
+        0,
         artistName,
         bio,
         baseUri,
         nbTiers
       )
 
-      // @TODO: Retrieve `campaignAddr` from event emitted
-      // expect(await tuneTogether.getOneCampaign(campaignAddr)).to.deep.equal([
-      //   campaignName,
-      //   description,
-      //   fees.toString()
-      // ])
+      const result = await tx.wait()
+
+      // Get the CampaignAdded event log by is index
+      const eventLog: any = result?.logs.find((log) => log.index == 2)
+      if (eventLog && eventLog.fragment.name == 'CampaignAdded') {
+        // Retrieve the campaign address created
+        const contractAddress: string = eventLog.args[1]
+        
+        expect(await tuneTogether.getOneCampaign(contractAddress)).to.deep.equal([
+          campaignName,
+          description,
+          fees.toString(),
+          nbTiers,
+          artist.address
+        ])
+      }
     })
 
     it('Revert if campaign name too short', async () => {
@@ -246,33 +251,229 @@ describe('TuneTogether', () => {
         nbTiers
       )).to.not.emit(tuneTogether, 'ArtistCreated')
     })
+
+    it('Revert if not enough tiers', async () => {
+      const { tuneTogether } = await loadFixture(deployFixture)
+  
+      await expect(tuneTogether.createNewCampaign(
+        campaignName,
+        description,
+        fees,
+        artistName,
+        bio,
+        baseUri,
+        0
+      )).to.be.revertedWith('Not enough tier prices')
+    })
+  
+    it('Revert if not enough tiers', async () => {
+      const { tuneTogether } = await loadFixture(deployFixture)
+  
+      await expect(tuneTogether.createNewCampaign(
+        campaignName,
+        description,
+        fees,
+        artistName,
+        bio,
+        baseUri,
+        42
+      )).to.be.revertedWith('Too many tier prices')
+    })
   })
 
-  it('Revert if not enough tiers', async () => {
-    const { tuneTogether } = await loadFixture(deployFixture)
+  describe('Update Campaign Informations', () => {
+    it('Should update campaign informations', async () => {
+      const { tuneTogether, artist } = await loadFixture(deployFixture)
 
-    await expect(tuneTogether.createNewCampaign(
-      campaignName,
-      description,
-      fees,
-      artistName,
-      bio,
-      baseUri,
-      0
-    )).to.be.revertedWith('Not enough tier prices')
-  })
+      const tx = await tuneTogether.connect(artist).createNewCampaign(
+        campaignName,
+        description,
+        0,
+        artistName,
+        bio,
+        baseUri,
+        nbTiers
+      )
 
-  it('Revert if not enough tiers', async () => {
-    const { tuneTogether } = await loadFixture(deployFixture)
+      const result = await tx.wait();
 
-    await expect(tuneTogether.createNewCampaign(
-      campaignName,
-      description,
-      fees,
-      artistName,
-      bio,
-      baseUri,
-      42
-    )).to.be.revertedWith('Too many tier prices')
+      // Get the CampaignAdded event log by is index
+      const eventLog: any = result?.logs.find((log) => log.index == 2)
+      if (eventLog && eventLog.fragment.name == 'CampaignAdded') {
+        // Retrieve the campaign address created
+        const contractAddress: string = eventLog.args[1]
+        
+        await expect(tuneTogether.connect(artist).updateCampaignInfo(
+          'new name',
+          'Update campaign with 0% fees',
+          0,
+          contractAddress
+        )).to.emit(tuneTogether, 'CampaignUpdated').withArgs(contractAddress)
+
+        await expect(tuneTogether.connect(artist).updateCampaignInfo(
+          'new name',
+          'Update campaign with 5% fees',
+          5,
+          contractAddress
+        )).to.emit(tuneTogether, 'CampaignUpdated').withArgs(contractAddress)
+
+        await expect(tuneTogether.connect(artist).updateCampaignInfo(
+          'new name',
+          'Update campaign with 10% fees',
+          10,
+          contractAddress
+        )).to.emit(tuneTogether, 'CampaignUpdated').withArgs(contractAddress)
+      }
+    })
+
+    it('Revert not the campaign artist', async () => {
+      const { tuneTogether, artist, owner } = await loadFixture(deployFixture)
+
+      const tx = await tuneTogether.connect(artist).createNewCampaign(
+        campaignName,
+        description,
+        0,
+        artistName,
+        bio,
+        baseUri,
+        nbTiers
+      )
+
+      const result = await tx.wait()
+
+      // Get the CampaignAdded event log by is index
+      const eventLog: any = result?.logs.find((log) => log.index == 2)
+      if (eventLog && eventLog.fragment.name == 'CampaignAdded') {
+        // Retrieve the campaign address created
+        const contractAddress: string = eventLog.args[1]
+        
+        await expect(tuneTogether.connect(owner).updateCampaignInfo(
+          campaignName,
+          description,
+          0,
+          contractAddress
+        )).to.be.revertedWith('You\'re not the campaign artist')
+      }
+    })
+
+    it('Revert if name too short', async () => {
+      const { tuneTogether, artist } = await loadFixture(deployFixture)
+
+      const tx = await tuneTogether.connect(artist).createNewCampaign(
+        campaignName,
+        description,
+        0,
+        artistName,
+        bio,
+        baseUri,
+        nbTiers
+      )
+
+      const result = await tx.wait()
+
+      // Get the CampaignAdded event log by is index
+      const eventLog: any = result?.logs.find((log) => log.index == 2)
+      if (eventLog && eventLog.fragment.name == 'CampaignAdded') {
+        // Retrieve the campaign address created
+        const contractAddress: string = eventLog.args[1]
+        
+        await expect(tuneTogether.connect(artist).updateCampaignInfo(
+          'S',
+          description,
+          0,
+          contractAddress
+        )).to.be.revertedWith('Name too short')
+      }
+    })
+
+    it('Revert if name too long', async () => {
+      const { tuneTogether, artist } = await loadFixture(deployFixture)
+
+      const tx = await tuneTogether.connect(artist).createNewCampaign(
+        campaignName,
+        description,
+        0,
+        artistName,
+        bio,
+        baseUri,
+        nbTiers
+      )
+
+      const result = await tx.wait()
+
+      // Get the CampaignAdded event log by is index
+      const eventLog: any = result?.logs.find((log) => log.index == 2)
+      if (eventLog && eventLog.fragment.name == 'CampaignAdded') {
+        // Retrieve the campaign address created
+        const contractAddress: string = eventLog.args[1]
+        
+        await expect(tuneTogether.connect(artist).updateCampaignInfo(
+          'This Campaign name is really long',
+          description,
+          0,
+          contractAddress
+        )).to.be.revertedWith('Name too long')
+      }
+    })
+
+    it('Revert if description too short', async () => {
+      const { tuneTogether, artist } = await loadFixture(deployFixture)
+
+      const tx = await tuneTogether.connect(artist).createNewCampaign(
+        campaignName,
+        description,
+        0,
+        artistName,
+        bio,
+        baseUri,
+        nbTiers
+      )
+
+      const result = await tx.wait()
+
+      // Get the CampaignAdded event log by is index
+      const eventLog: any = result?.logs.find((log) => log.index == 2)
+      if (eventLog && eventLog.fragment.name == 'CampaignAdded') {
+        // Retrieve the campaign address created
+        const contractAddress: string = eventLog.args[1]
+        
+        await expect(tuneTogether.connect(artist).updateCampaignInfo(
+          campaignName,
+          'S',
+          0,
+          contractAddress
+        )).to.be.revertedWith('Description too short')
+      }
+    })
+
+    it('Revert if wrong fees', async () => {
+      const { tuneTogether, artist } = await loadFixture(deployFixture)
+
+      const tx = await tuneTogether.connect(artist).createNewCampaign(
+        campaignName,
+        description,
+        0,
+        artistName,
+        bio,
+        baseUri,
+        nbTiers
+      )
+
+      const result = await tx.wait()
+
+      // Get the CampaignAdded event log by is index
+      const eventLog: any = result?.logs.find((log) => log.index == 2)
+      if (eventLog && eventLog.fragment.name == 'CampaignAdded') {
+        // Retrieve the campaign address created
+        const contractAddress: string = eventLog.args[1]
+        
+        await expect(tuneTogether.connect(artist).updateCampaignInfo(
+          campaignName,
+          description,
+          42,
+          contractAddress
+        )).to.be.revertedWith('Wrong fees option')
+      }
+    })
   })
 })

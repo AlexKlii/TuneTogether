@@ -19,7 +19,7 @@ contract CampaignFactory is Ownable {
         bytes32 salt = keccak256(abi.encodePacked(_uri, _artistAddr));
         bytes memory campaignBytecode = abi.encodePacked(
             type(CrowdfundingCampaign).creationCode,
-            abi.encode(_uri, _artistAddr, _name, _fees, _description, _nbTiers)
+            abi.encode(_uri, _ownerContractAddr, _artistAddr, _name, _fees, _description, _nbTiers)
         );
 
         assembly {
