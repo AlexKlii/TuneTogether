@@ -1,19 +1,29 @@
 # Changelog
 
-## 0.7.0 (2023-07-12)
+## 0.8.0 (2023-07-12)
 
-### feat: Implement Requirements for CampaignFactory contract
+### feat: Update Requirements for CrowfundingCampaign contract
 
-- Implement `setOwnerContractAddr` to update new `_ownerContractAddr` variable
-- New event `OwnerContractUpdated`
-- Implement requirements to `createCrowdfundingCampaign` method
+- Update requirements to `updateCampaignInfo` method
+- Implement `updateCampaignInfo` in `TuneTogether` contract
+- Update deploy scrpits
 - Update tests
 ---
 
 <details>
   <summary>See old changelog</summary>
 
-## 0.6.0 (2023-07-11)
+  ## 0.7.0 (2023-07-12)
+
+  ### feat: Implement Requirements for CampaignFactory contract
+
+  - Implement `setOwnerContractAddr` to update new `_ownerContractAddr` variable
+  - New event `OwnerContractUpdated`
+  - Implement requirements to `createCrowdfundingCampaign` method
+  - Update tests
+  ---
+
+  ## 0.6.0 (2023-07-11)
 
   ### feat: Implement Tier Prices
 

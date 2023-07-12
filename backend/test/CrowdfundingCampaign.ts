@@ -1,4 +1,4 @@
-import { CrowdfundingCampaign } from '../typechain-types'
+import { CampaignFactory, CrowdfundingCampaign, TuneTogether } from '../typechain-types'
 import { expect } from 'chai'
 import { ethers } from 'hardhat'
 import { HardhatEthersSigner } from '@nomicfoundation/hardhat-ethers/signers'
@@ -16,29 +16,30 @@ describe('CrowdfundingCampaign', () => {
 
   async function deployFixture(): Promise<CrowdfundingCampaignFixture> {
     const CrowdfundingCampaign = await ethers.getContractFactory('CrowdfundingCampaign')
-    const [owner, artist, investor]: HardhatEthersSigner[] = await ethers.getSigners()
-
+    const [owner, artist, investor, tuneTogether]: HardhatEthersSigner[] = await ethers.getSigners()
+  
     const crowdfundingCampaign: CrowdfundingCampaign = await CrowdfundingCampaign.connect(owner).deploy(
       baseUri,
+      tuneTogether.address,
       artist.address,
       campaignName,
       fees,
       description,
-      nbTiers
+      nbTiers,
     )
 
-    return { crowdfundingCampaign, owner, artist, investor }
+    return { crowdfundingCampaign, owner, artist, investor, tuneTogether }
   }
 
   async function deployFixtureWithCampaign(): Promise<CrowdfundingCampaignFixture> {
-    const { crowdfundingCampaign, owner, artist, investor } = await loadFixture(deployFixture)
+    const { crowdfundingCampaign, owner, artist, investor, tuneTogether } = await loadFixture(deployFixture)
     await crowdfundingCampaign.connect(artist).setTierPrice(1, oneEther)
     await crowdfundingCampaign.connect(artist).setTierPrice(2, twoEther)
     await crowdfundingCampaign.connect(artist).setTierPrice(3, threeEther)
     await crowdfundingCampaign.connect(artist).setTierPrice(4, fourEther)
     await crowdfundingCampaign.connect(artist).startCampaign()
 
-    return { crowdfundingCampaign, owner, artist, investor }
+    return { crowdfundingCampaign, owner, artist, investor, tuneTogether }
   }
 
   describe('Deployment', () => {
@@ -136,39 +137,39 @@ describe('CrowdfundingCampaign', () => {
 
   describe('Update Campaign Informations', () => {
     it('Should update campaign informations', async () => {
-      const { crowdfundingCampaign, artist } = await loadFixture(deployFixture)
+      const { crowdfundingCampaign, tuneTogether } = await loadFixture(deployFixture)
 
-      await expect(crowdfundingCampaign.connect(artist).updateCampaignInfo(
+      await expect(crowdfundingCampaign.connect(tuneTogether).updateCampaignInfo(
         'new name',
         'Update campaign with 0% fees',
         0
       )).to.emit(crowdfundingCampaign, 'CampaignInfoUpdated').withArgs('new name', 'Update campaign with 0% fees', 0)
 
-      await expect(crowdfundingCampaign.connect(artist).updateCampaignInfo(
+      await expect(crowdfundingCampaign.connect(tuneTogether).updateCampaignInfo(
         'new name',
         'Update campaign with 5% fees',
         5
       )).to.emit(crowdfundingCampaign, 'CampaignInfoUpdated').withArgs('new name', 'Update campaign with 5% fees', 5)
 
-      await expect(crowdfundingCampaign.connect(artist).updateCampaignInfo(
+      await expect(crowdfundingCampaign.connect(tuneTogether).updateCampaignInfo(
         'new name',
         'Update campaign with 10% fees',
         10
       )).to.emit(crowdfundingCampaign, 'CampaignInfoUpdated').withArgs('new name', 'Update campaign with 10% fees', 10)
     })
 
-    it('Revert if not the Artist of the campaign', async () => {
+    it('Revert if caller is not TuneTogheter contract', async () => {
       const { crowdfundingCampaign, owner } = await loadFixture(deployFixture)
       await expect(crowdfundingCampaign.connect(owner).updateCampaignInfo(
         'new name',
         'new description',
         0
-      )).to.be.revertedWith('You\'re not the campaign artist')
+      )).to.be.revertedWith('You\'re not the owner')
     })
 
     it('Revert if campaign already started', async () => {
-      const { crowdfundingCampaign, artist } = await loadFixture(deployFixtureWithCampaign)
-      await expect(crowdfundingCampaign.connect(artist).updateCampaignInfo(
+      const { crowdfundingCampaign, tuneTogether } = await loadFixture(deployFixtureWithCampaign)
+      await expect(crowdfundingCampaign.connect(tuneTogether).updateCampaignInfo(
         'new name',
         'new description',
         0
@@ -176,8 +177,8 @@ describe('CrowdfundingCampaign', () => {
     })
 
     it('Revert if name too short', async () => {
-      const { crowdfundingCampaign, artist } = await loadFixture(deployFixture)
-      await expect(crowdfundingCampaign.connect(artist).updateCampaignInfo(
+      const { crowdfundingCampaign, tuneTogether } = await loadFixture(deployFixture)
+      await expect(crowdfundingCampaign.connect(tuneTogether).updateCampaignInfo(
         'S',
         'new description',
         0
@@ -185,8 +186,8 @@ describe('CrowdfundingCampaign', () => {
     })
 
     it('Revert if name too long', async () => {
-      const { crowdfundingCampaign, artist } = await loadFixture(deployFixture)
-      await expect(crowdfundingCampaign.connect(artist).updateCampaignInfo(
+      const { crowdfundingCampaign, tuneTogether } = await loadFixture(deployFixture)
+      await expect(crowdfundingCampaign.connect(tuneTogether).updateCampaignInfo(
         'This Campaign name is really long',
         'new description',
         0
@@ -194,8 +195,8 @@ describe('CrowdfundingCampaign', () => {
     })
 
     it('Revert if description too short', async () => {
-      const { crowdfundingCampaign, artist } = await loadFixture(deployFixture)
-      await expect(crowdfundingCampaign.connect(artist).updateCampaignInfo(
+      const { crowdfundingCampaign, tuneTogether } = await loadFixture(deployFixture)
+      await expect(crowdfundingCampaign.connect(tuneTogether).updateCampaignInfo(
         'new name',
         'S',
         0
@@ -203,8 +204,8 @@ describe('CrowdfundingCampaign', () => {
     })
 
     it('Revert if wrong fees', async () => {
-      const { crowdfundingCampaign, artist } = await loadFixture(deployFixture)
-      await expect(crowdfundingCampaign.connect(artist).updateCampaignInfo(
+      const { crowdfundingCampaign, tuneTogether } = await loadFixture(deployFixture)
+      await expect(crowdfundingCampaign.connect(tuneTogether).updateCampaignInfo(
         'new name',
         'new description',
         42

@@ -5,6 +5,7 @@ export interface CrowdfundingCampaignFixture {
     owner: HardhatEthersSigner
     artist: HardhatEthersSigner
     investor: HardhatEthersSigner
+    tuneTogether: HardhatEthersSigner
     crowdfundingCampaign: CrowdfundingCampaign
 }
 

@@ -2,14 +2,18 @@
 pragma solidity 0.8.19;
 
 import './CampaignFactory.sol';
+import './CrowdfundingCampaign.sol';
 
 contract TuneTogether {
     CampaignFactory private _campaignFactory;
+    CrowdfundingCampaign private _crowdfundingCampaign;
 
     struct Campaign {
         string name;
         string description;
         uint8 fees;
+        uint8 nbTiers;
+        address artist;
     }
 
     struct Artist {
@@ -22,6 +26,8 @@ contract TuneTogether {
     mapping(address => Campaign) campaigns;
 
     event ArtistCreated(address _artistAddr);
+    event CampaignAdded(address _artistAddr, address _campaignAddr);
+    event CampaignUpdated(address _campaignAddr);
 
     constructor(address _campaignFactoryAddress) {
         _campaignFactory = CampaignFactory(_campaignFactoryAddress);
@@ -39,11 +45,30 @@ contract TuneTogether {
         require(_nbTiers <= 10, 'Too many tier prices');
 
         address _campaignAddr = _campaignFactory.createCrowdfundingCampaign(_uri, msg.sender, _campaignName, _fees, _description, _nbTiers);
-        _setCampaign(_campaignAddr, _campaignName, _fees, _description);
+        _setCampaign(_campaignAddr, _campaignName, _fees, _description, _nbTiers);
 
         if (bytes(artists[msg.sender].name).length == 0) {
             _setArtist(_artistName, _bio, _fees);
         }
+
+        emit CampaignAdded(msg.sender, _campaignAddr);
+    }
+
+    function updateCampaignInfo(string memory _name, string memory _description, uint8 _fees, address _addr) external {
+        require(campaigns[_addr].artist == msg.sender, 'You\'re not the campaign artist');
+        require(bytes(_name).length >= 5, 'Name too short');
+        require(bytes(_name).length <= 20, 'Name too long');
+        require(bytes(_description).length >= 10, 'Description too short');
+        require(_fees == 0 || _fees == 5 || _fees == 10, 'Wrong fees option');
+
+        _crowdfundingCampaign = CrowdfundingCampaign(_addr);
+        _crowdfundingCampaign.updateCampaignInfo(_name, _description, _fees);
+
+        campaigns[_addr].description = _description;
+        campaigns[_addr].name = _name;
+        campaigns[_addr].fees = _fees;
+        
+        emit CampaignUpdated(_addr);
     }
 
     function isArtist(address _addr) external view returns (bool) {
@@ -67,8 +92,8 @@ contract TuneTogether {
         emit ArtistCreated(msg.sender);
     }
 
-    function _setCampaign(address _addr, string memory _name, uint8 _fees, string memory _description) private {
-        Campaign memory campaign = Campaign(_name, _description, _fees);
+    function _setCampaign(address _addr, string memory _name, uint8 _fees, string memory _description, uint8 _nbTiers) private {
+        Campaign memory campaign = Campaign(_name, _description, _fees, _nbTiers, msg.sender);
         campaigns[_addr] = campaign;
     }
 }

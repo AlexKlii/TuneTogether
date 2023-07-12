@@ -21,6 +21,19 @@ async function main() {
   console.log(`CampaignFactory deployed to ${campaignFactoryAddress}`)
 
   /* ****************************************************************** */
+  /* **********            Deploy TuneTogether            ************* */
+  /* ****************************************************************** */
+  const TuneTogether = await ethers.getContractFactory('TuneTogether')
+  const tuneTogether: TuneTogether = await TuneTogether.connect(owner).deploy(campaignFactoryAddress)
+
+  await tuneTogether.waitForDeployment()
+  const tuneTogetherAddress = await tuneTogether.getAddress()
+  
+  await campaignFactory.connect(owner).setOwnerContractAddr(tuneTogetherAddress)
+
+  console.log(`TuneTogether deployed to ${tuneTogetherAddress}`)
+
+  /* ****************************************************************** */
   /* **********                Lisen Event                ************* */
   /* ****************************************************************** */
   const filter = campaignFactory.filters['CrowdfundingCampaignCreated(address,address,uint256)']
@@ -31,26 +44,21 @@ async function main() {
     /* **********               Mint some NFT               ************* */
     /* ****************************************************************** */
     const crowdfundingCampaign: CrowdfundingCampaign = await ethers.getContractAt('CrowdfundingCampaign', campaignAddr)
+    const prices: number[] = [0.00001, 0.00002, 0.00005, 0.0001]
 
-    await crowdfundingCampaign.connect(investor).mint(1, 5)
-    await crowdfundingCampaign.connect(investor).mint(2, 1)
-    await crowdfundingCampaign.connect(investor).mint(3, 2)
-    await crowdfundingCampaign.connect(investor).mint(4, 1)
+    for (let i = 1; i <= 4; i++) {
+      await crowdfundingCampaign.connect(artist).setTierPrice(i, ethers.parseEther(prices[i-1].toString()))
+    }
+
+    await crowdfundingCampaign.connect(artist).startCampaign()
+
+    for (let i = 1; i <= 4; i++) {
+      await crowdfundingCampaign.connect(investor).mint(i, 1, { value: ethers.parseEther(prices[i-1].toString())})
+    }
 
     console.log(`Mint some NFTs with address: ${investor.address}`)
     process.exit(0)
   })
-
-  /* ****************************************************************** */
-  /* **********            Deploy TuneTogether            ************* */
-  /* ****************************************************************** */
-  const TuneTogether = await ethers.getContractFactory('TuneTogether')
-  const tuneTogether: TuneTogether = await TuneTogether.connect(owner).deploy(campaignFactoryAddress)
-
-  await tuneTogether.waitForDeployment()
-  const tuneTogetherAddress = await tuneTogether.getAddress()
-
-  console.log(`TuneTogether deployed to ${tuneTogetherAddress}`)
 
   /* ****************************************************************** */
   /* **********       Deploy a CrowdfundingCampaign       ************* */
@@ -61,8 +69,11 @@ async function main() {
     0,
     'TuneTogether',
     'TuneTogether Artist bio',
-    'ipfs://bafybeifs5oytiw5tq3d3wnzcnv5nnre5fqgpprgd7baybkdal3hruvuhlq/'
+    'ipfs://bafybeifs5oytiw5tq3d3wnzcnv5nnre5fqgpprgd7baybkdal3hruvuhlq/',
+    4
   )
+
+  console.log(`Create new Campaign...`)
 
   await tx.wait()
 }
