@@ -17,6 +17,9 @@ describe('TuneTogether', () => {
     const campaignFactoryAddr = await campaignFactory.getAddress()
 
     const tuneTogether: TuneTogether = await TuneTogether.connect(owner).deploy(campaignFactoryAddr)
+    const tuneTogetherAddr: string = await tuneTogether.getAddress()
+    await campaignFactory.setOwnerContractAddr(tuneTogetherAddr)
+
     return { tuneTogether, campaignFactory, owner, artist }
   }
 

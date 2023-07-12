@@ -1,18 +1,28 @@
 # Changelog
 
-## 0.6.0 (2023-07-11)
+## 0.7.0 (2023-07-12)
 
-### feat: Implement Tier Prices
+### feat: Implement Requirements for CampaignFactory contract
 
-- Implement new method `setTierPrice` in `CrowfundingCampaign` contract
-- Update `createNewCampaign` method requirements in `TuneTogether` contract
-- Update `startCampaign` method requirements in `CrowfundingCampaign` contract
-- Update `mint` method requirements in `CrowfundingCampaign` contract
+- Implement `setOwnerContractAddr` to update new `_ownerContractAddr` variable
+- New event `OwnerContractUpdated`
+- Implement requirements to `createCrowdfundingCampaign` method
 - Update tests
 ---
 
 <details>
   <summary>See old changelog</summary>
+
+## 0.6.0 (2023-07-11)
+
+  ### feat: Implement Tier Prices
+
+  - Implement new method `setTierPrice` in `CrowfundingCampaign` contract
+  - Update `createNewCampaign` method requirements in `TuneTogether` contract
+  - Update `startCampaign` method requirements in `CrowfundingCampaign` contract
+  - Update `mint` method requirements in `CrowfundingCampaign` contract
+  - Update tests
+  ---
 
   ## 0.5.0 (2023-07-11)
 
