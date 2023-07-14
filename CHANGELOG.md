@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.9.1 (2023-07-14)
+
+### fix: Update script to fix issue on mumbai testnet
+
+- Update `01_genesisProject` script to fix issue on mumbai testnet
+- Update `.gitignore` files
+---
+
 ## 0.9.0 (2023-07-14)
 
 ### feat: Implement mint in USDC

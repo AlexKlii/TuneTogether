@@ -42,7 +42,8 @@ async function main() {
   await tuneTogether.waitForDeployment()
   const tuneTogetherAddress = await tuneTogether.getAddress()
   
-  await campaignFactory.connect(owner).setOwnerContractAddr(tuneTogetherAddress)
+  const setOwnerTx = await campaignFactory.connect(owner).setOwnerContractAddr(tuneTogetherAddress)
+  await setOwnerTx.wait()
 
   console.log(`TuneTogether deployed to ${tuneTogetherAddress}`)
 
@@ -57,29 +58,38 @@ async function main() {
     // 1 USDC - 20 USDC - 50 USDC - 100 USDC 
     const prices: number[] = [1000000, 20000000, 50000000, 100000000]
 
+    console.log('Set Tier Prices...')
     for (let i = 1; i <= 4; i++) {
-      await crowdfundingCampaign.connect(artist).setTierPrice(i, (prices[i - 1]).toString())
+      console.log(`Tier Price ${i}...`)
+      const setTierPriceTx = await crowdfundingCampaign.connect(artist).setTierPrice(i, (prices[i - 1]).toString())
+      await setTierPriceTx.wait()
     }
 
-    await crowdfundingCampaign.connect(artist).startCampaign()
+    const startCampaignTx = await crowdfundingCampaign.connect(artist).startCampaign()
+    await startCampaignTx.wait()
 
+    console.log(`Minting NFT with address: ${investor.address}...`)
     /* ****************************************************************** */
     /* **********               Mint some NFT               ************* */
     /* ****************************************************************** */
 
     for (let i = 1; i <= 4; i++) {
-      await usdc.connect(investor).approve(campaignAddr, prices[i - 1])
-      await crowdfundingCampaign.connect(investor).mint(i, 1)
+      console.log(`Mint NFT ${i}...`)
+      const approveTx = await usdc.connect(investor).approve(campaignAddr, prices[i - 1])
+      await approveTx.wait()
+
+      const mintTx = await crowdfundingCampaign.connect(investor).mint(i, 1)
+      await mintTx.wait()
     }
 
-    console.log(`Mint some NFTs with address: ${investor.address}`)
+    console.log(`NFTs minted !`)
     process.exit(0)
   })
 
   /* ****************************************************************** */
   /* **********       Deploy a CrowdfundingCampaign       ************* */
   /* ****************************************************************** */
-  const tx = await tuneTogether.connect(artist).createNewCampaign(
+  const createCampaignTx = await tuneTogether.connect(artist).createNewCampaign(
     'GENESIS Campaign',
     'The Gensis TuneTogether Crowfunding Campaign',
     0,
@@ -91,7 +101,7 @@ async function main() {
 
   console.log(`Create new Campaign...`)
 
-  await tx.wait()
+  await createCampaignTx.wait()
 }
 
 main()
