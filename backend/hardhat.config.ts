@@ -1,5 +1,6 @@
 import { HardhatUserConfig, task } from 'hardhat/config'
 import '@nomicfoundation/hardhat-toolbox'
+import 'solidity-docgen'
 require('dotenv').config()
 
 import './tasks/approveAllowance'
@@ -30,6 +31,9 @@ const config: HardhatUserConfig = {
       accounts: [`${process.env.PRIVATE_KEY}`]
     }
   },
+  docgen: { 
+    pages: 'files'
+  }
 }
 
 export default config
