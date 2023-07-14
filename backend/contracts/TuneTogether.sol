@@ -8,6 +8,8 @@ contract TuneTogether {
     CampaignFactory private _campaignFactory;
     CrowdfundingCampaign private _crowdfundingCampaign;
 
+    address private _usdcAddr;
+
     struct Campaign {
         string name;
         string description;
@@ -29,29 +31,30 @@ contract TuneTogether {
     event CampaignAdded(address _artistAddr, address _campaignAddr);
     event CampaignUpdated(address _campaignAddr);
 
-    constructor(address _campaignFactoryAddress) {
+    constructor(address _campaignFactoryAddress, address usdcAddr_) {
         _campaignFactory = CampaignFactory(_campaignFactoryAddress);
+        _usdcAddr = usdcAddr_;
     }
 
     function createNewCampaign(string memory _campaignName, string memory _description, uint8 _fees, string memory _artistName, string memory _bio, string memory _uri, uint8 _nbTiers) external {
         require(bytes(_campaignName).length >= 5, 'Campaign name too short');
         require(bytes(_campaignName).length <= 20, 'Campaign name too long');
         require(bytes(_description).length >= 10, 'Campaign description too short');
-        require(_fees == 0 || _fees == 5 ||_fees == 10, 'Wrong fees');
+        require(_fees == 0 || _fees == 5 || _fees == 10, 'Wrong fees');
         require(bytes(_artistName).length >= 5, 'Artist name too short');
         require(bytes(_artistName).length <= 20, 'Artist name too long');
         require(bytes(_bio).length >= 10, 'Artist bio too short');
         require(_nbTiers > 0, 'Not enough tier prices');
         require(_nbTiers <= 10, 'Too many tier prices');
 
-        address _campaignAddr = _campaignFactory.createCrowdfundingCampaign(_uri, msg.sender, _campaignName, _fees, _description, _nbTiers);
+        address _campaignAddr = _campaignFactory.createCrowdfundingCampaign(_uri, msg.sender, _campaignName, _fees, _description, _nbTiers, _usdcAddr);
+       
         _setCampaign(_campaignAddr, _campaignName, _fees, _description, _nbTiers);
+        emit CampaignAdded(msg.sender, _campaignAddr);
 
         if (bytes(artists[msg.sender].name).length == 0) {
             _setArtist(_artistName, _bio, _fees);
         }
-
-        emit CampaignAdded(msg.sender, _campaignAddr);
     }
 
     function updateCampaignInfo(string memory _name, string memory _description, uint8 _fees, address _addr) external {

@@ -1,6 +1,6 @@
 import { ethers } from 'hardhat'
 import { HardhatEthersSigner } from '@nomicfoundation/hardhat-ethers/signers'
-import { CrowdfundingCampaign, CampaignFactory, TuneTogether } from '../typechain-types'
+import { CrowdfundingCampaign, CampaignFactory, TuneTogether, Usdc } from '../typechain-types'
 
 async function main() {
   let [owner, artist, investor]: HardhatEthersSigner[] = await ethers.getSigners()
@@ -21,10 +21,23 @@ async function main() {
   console.log(`CampaignFactory deployed to ${campaignFactoryAddress}`)
 
   /* ****************************************************************** */
+  /* **********           Deploy USDC Contract            ************* */
+  /* ****************************************************************** */
+  const Usdc = await ethers.getContractFactory('Usdc')
+  const usdc: Usdc = await Usdc.connect(owner).deploy()
+
+  await usdc.waitForDeployment()
+  const usdcAddr = await usdc.getAddress()
+
+  await usdc.faucet(investor.address, 420 * 10**6)
+
+  console.log(`USDC deployed to ${usdcAddr}`)
+
+  /* ****************************************************************** */
   /* **********            Deploy TuneTogether            ************* */
   /* ****************************************************************** */
   const TuneTogether = await ethers.getContractFactory('TuneTogether')
-  const tuneTogether: TuneTogether = await TuneTogether.connect(owner).deploy(campaignFactoryAddress)
+  const tuneTogether: TuneTogether = await TuneTogether.connect(owner).deploy(campaignFactoryAddress, usdcAddr)
 
   await tuneTogether.waitForDeployment()
   const tuneTogetherAddress = await tuneTogether.getAddress()
@@ -36,24 +49,27 @@ async function main() {
   /* ****************************************************************** */
   /* **********                Lisen Event                ************* */
   /* ****************************************************************** */
-  const filter = campaignFactory.filters['CrowdfundingCampaignCreated(address,address,uint256)']
-  campaignFactory.on(filter, async (artistAddr, campaignAddr) => {
+  const filter = tuneTogether.filters['CampaignAdded(address,address)']
+  tuneTogether.on(filter, async (artistAddr: string, campaignAddr: string) => {
     console.log(`CrowdfundingCampaign deployed to ${campaignAddr} by ${artistAddr}`)
 
-    /* ****************************************************************** */
-    /* **********               Mint some NFT               ************* */
-    /* ****************************************************************** */
     const crowdfundingCampaign: CrowdfundingCampaign = await ethers.getContractAt('CrowdfundingCampaign', campaignAddr)
-    const prices: number[] = [0.00001, 0.00002, 0.00005, 0.0001]
+    // 1 USDC - 20 USDC - 50 USDC - 100 USDC 
+    const prices: number[] = [1000000, 20000000, 50000000, 100000000]
 
     for (let i = 1; i <= 4; i++) {
-      await crowdfundingCampaign.connect(artist).setTierPrice(i, ethers.parseEther(prices[i-1].toString()))
+      await crowdfundingCampaign.connect(artist).setTierPrice(i, (prices[i - 1]).toString())
     }
 
     await crowdfundingCampaign.connect(artist).startCampaign()
 
+    /* ****************************************************************** */
+    /* **********               Mint some NFT               ************* */
+    /* ****************************************************************** */
+
     for (let i = 1; i <= 4; i++) {
-      await crowdfundingCampaign.connect(investor).mint(i, 1, { value: ethers.parseEther(prices[i-1].toString())})
+      await usdc.connect(investor).approve(campaignAddr, prices[i - 1])
+      await crowdfundingCampaign.connect(investor).mint(i, 1)
     }
 
     console.log(`Mint some NFTs with address: ${investor.address}`)

@@ -1,4 +1,4 @@
-import { CampaignFactory } from '../typechain-types'
+import { CampaignFactory, Usdc } from '../typechain-types'
 import { expect } from 'chai'
 import { ethers } from 'hardhat'
 import { HardhatEthersSigner } from '@nomicfoundation/hardhat-ethers/signers'
@@ -15,8 +15,12 @@ describe('CampaignFactory', () => {
     const [owner, artist, tuneTogetherContract]: HardhatEthersSigner[] = await ethers.getSigners()
 
     const campaignFactory: CampaignFactory =  await CampaignFactory.connect(owner).deploy()
+
+    const USDC = await ethers.getContractFactory('Usdc')
+    const usdc: Usdc = await USDC.connect(owner).deploy()
+    const usdcAddr: string = await usdc.getAddress();
     
-    return { campaignFactory, owner, artist, tuneTogetherContract }
+    return { campaignFactory, owner, artist, tuneTogetherContract, usdcAddr }
   }
 
   describe('Set owner contract address', () => {
@@ -33,7 +37,7 @@ describe('CampaignFactory', () => {
 
   describe('Create Campaign', () => {
     it('Should create a campaign', async () => {
-      const { campaignFactory, owner, tuneTogetherContract } = await loadFixture(deployFixture)
+      const { campaignFactory, owner, tuneTogetherContract, usdcAddr } = await loadFixture(deployFixture)
       await campaignFactory.connect(owner).setOwnerContractAddr(tuneTogetherContract.address)
       await expect(campaignFactory.connect(tuneTogetherContract).createCrowdfundingCampaign(
         baseUri,
@@ -41,19 +45,21 @@ describe('CampaignFactory', () => {
         campaignName,
         fees,
         description,
-        nbTiers
+        nbTiers,
+        usdcAddr
       )).to.emit(campaignFactory, 'CrowdfundingCampaignCreated')
     })
 
     it('Revert if caller not the contract owner', async () => {
-      const { campaignFactory, owner } = await loadFixture(deployFixture)
+      const { campaignFactory, owner, usdcAddr } = await loadFixture(deployFixture)
       await expect(campaignFactory.connect(owner).createCrowdfundingCampaign(
         baseUri,
         owner.address,
         campaignName,
         fees,
         description,
-        nbTiers
+        nbTiers,
+        usdcAddr
       )).to.be.revertedWith('You\'re not the owner')
     })
   })

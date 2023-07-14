@@ -1,17 +1,33 @@
 # Changelog
 
-## 0.8.0 (2023-07-12)
+## 0.9.0 (2023-07-14)
 
-### feat: Update Requirements for CrowfundingCampaign contract
+### feat: Implement mint in USDC
 
-- Update requirements to `updateCampaignInfo` method
-- Implement `updateCampaignInfo` in `TuneTogether` contract
+- Update `mint` method in `CrowfundingCampaign` to accept USDC
+- Add `withdraw` method in `CrowfundingCampaign`
+- Add `getTierPrice` method in `CrowfundingCampaign`
+- Implement `Usdc` contract (only for dev and unit test)
+- Implement new tasks (only for dev)
+  - `approveAllowance`
+  - `faucet`
+- Update `README` file
 - Update deploy scrpits
 - Update tests
 ---
 
 <details>
   <summary>See old changelog</summary>
+
+  ## 0.8.0 (2023-07-12)
+
+  ### feat: Update Requirements for CrowfundingCampaign contract
+
+  - Update requirements to `updateCampaignInfo` method
+  - Implement `updateCampaignInfo` in `TuneTogether` contract
+  - Update deploy scrpits
+  - Update tests
+  ---
 
   ## 0.7.0 (2023-07-12)
 
