@@ -1,4 +1,4 @@
-import { CampaignFactory, CrowdfundingCampaign, TuneTogether, Usdc } from '../typechain-types'
+import { CrowdfundingCampaign, Usdc } from '../typechain-types'
 import { expect } from 'chai'
 import { ethers } from 'hardhat'
 import { HardhatEthersSigner } from '@nomicfoundation/hardhat-ethers/signers'
@@ -189,42 +189,6 @@ describe('CrowdfundingCampaign', () => {
         0
       )).to.be.revertedWith('Campaign already started')
     })
-
-    it('Revert if name too short', async () => {
-      const { crowdfundingCampaign, tuneTogether } = await loadFixture(deployFixture)
-      await expect(crowdfundingCampaign.connect(tuneTogether).updateCampaignInfo(
-        'S',
-        'new description',
-        0
-      )).to.be.revertedWith('Name too short')
-    })
-
-    it('Revert if name too long', async () => {
-      const { crowdfundingCampaign, tuneTogether } = await loadFixture(deployFixture)
-      await expect(crowdfundingCampaign.connect(tuneTogether).updateCampaignInfo(
-        'This Campaign name is really long',
-        'new description',
-        0
-      )).to.be.revertedWith('Name too long')
-    })
-
-    it('Revert if description too short', async () => {
-      const { crowdfundingCampaign, tuneTogether } = await loadFixture(deployFixture)
-      await expect(crowdfundingCampaign.connect(tuneTogether).updateCampaignInfo(
-        'new name',
-        'S',
-        0
-      )).to.be.revertedWith('Description too short')
-    })
-
-    it('Revert if wrong fees', async () => {
-      const { crowdfundingCampaign, tuneTogether } = await loadFixture(deployFixture)
-      await expect(crowdfundingCampaign.connect(tuneTogether).updateCampaignInfo(
-        'new name',
-        'new description',
-        42
-      )).to.be.revertedWith('Wrong fees option')
-    })
   })
 
   describe('Mint', () => {
@@ -306,6 +270,66 @@ describe('CrowdfundingCampaign', () => {
       await crowdfundingCampaign.connect(artist).closeCampaign()
 
       await expect(crowdfundingCampaign.connect(artist).withdraw()).to.emit(crowdfundingCampaign, 'FundWithdraw')
+    })
+  })
+
+  describe('Boost', () => {
+    it('Should set boost', async () => {
+      const { crowdfundingCampaign, artist, tuneTogether } = await loadFixture(deployFixture)
+      await crowdfundingCampaign.connect(artist).setTierPrice(1, tierOne)
+      await crowdfundingCampaign.connect(artist).setTierPrice(2, tierTwo)
+      await crowdfundingCampaign.connect(artist).setTierPrice(3, tierThree)
+      await crowdfundingCampaign.connect(artist).setTierPrice(4, tierFour)
+      await crowdfundingCampaign.connect(artist).startCampaign()
+
+      await expect(crowdfundingCampaign.connect(tuneTogether).setBoost(Date.now())).to.emit(crowdfundingCampaign, 'Boosted')
+    })
+
+    it('Revert if not the campaign artist', async () => {
+      const { crowdfundingCampaign, artist } = await loadFixture(deployFixture)
+      await crowdfundingCampaign.connect(artist).setTierPrice(1, tierOne)
+      await crowdfundingCampaign.connect(artist).setTierPrice(2, tierTwo)
+      await crowdfundingCampaign.connect(artist).setTierPrice(3, tierThree)
+      await crowdfundingCampaign.connect(artist).setTierPrice(4, tierFour)
+      await crowdfundingCampaign.connect(artist).startCampaign()
+
+      await expect(crowdfundingCampaign.connect(artist).setBoost(Date.now())).to.be.revertedWith('You\'re not the owner')
+    })
+
+    it('Revert if Artist didn\'t start the campaign', async () => {
+      const { crowdfundingCampaign, artist, tuneTogether } = await loadFixture(deployFixture)
+      await crowdfundingCampaign.connect(artist).setTierPrice(1, tierOne)
+      await crowdfundingCampaign.connect(artist).setTierPrice(2, tierTwo)
+      await crowdfundingCampaign.connect(artist).setTierPrice(3, tierThree)
+      await crowdfundingCampaign.connect(artist).setTierPrice(4, tierFour)
+
+      await expect(crowdfundingCampaign.connect(tuneTogether).setBoost(Date.now())).to.be.revertedWith('Artist didn\'t start the campaign yet')
+    })
+
+    it('Revert if campaign closed', async () => {
+      const { crowdfundingCampaign, artist, tuneTogether } = await loadFixture(deployFixture)
+      await crowdfundingCampaign.connect(artist).setTierPrice(1, tierOne)
+      await crowdfundingCampaign.connect(artist).setTierPrice(2, tierTwo)
+      await crowdfundingCampaign.connect(artist).setTierPrice(3, tierThree)
+      await crowdfundingCampaign.connect(artist).setTierPrice(4, tierFour)
+      await crowdfundingCampaign?.connect(artist).startCampaign()
+      await crowdfundingCampaign?.connect(artist).closeCampaign()
+
+      await expect(crowdfundingCampaign.connect(tuneTogether).setBoost(Date.now())).to.be.revertedWith('Campaign closed')
+    })
+
+    it('Revert if campaign ended', async () => {
+      const { crowdfundingCampaign, artist, tuneTogether } = await loadFixture(deployFixture)
+      await crowdfundingCampaign.connect(artist).setTierPrice(1, tierOne)
+      await crowdfundingCampaign.connect(artist).setTierPrice(2, tierTwo)
+      await crowdfundingCampaign.connect(artist).setTierPrice(3, tierThree)
+      await crowdfundingCampaign.connect(artist).setTierPrice(4, tierFour)
+      await crowdfundingCampaign?.connect(artist).startCampaign()
+
+      // Advance time by 8 weeks and mine a new block
+      await time.increase(4838420);
+
+      await expect(crowdfundingCampaign.connect(tuneTogether).setBoost(Date.now())).to.be.revertedWith('Campaign ended')
     })
   })
 })

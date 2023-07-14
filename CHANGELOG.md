@@ -1,31 +1,39 @@
 # Changelog
 
-## 0.9.1 (2023-07-14)
+## 0.10.0 (2023-07-14)
 
-### fix: Update script to fix issue on mumbai testnet
+### feat: Boost Campaign
 
-- Update `01_genesisProject` script to fix issue on mumbai testnet
-- Update `.gitignore` files
----
-
-## 0.9.0 (2023-07-14)
-
-### feat: Implement mint in USDC
-
-- Update `mint` method in `CrowfundingCampaign` to accept USDC
-- Add `withdraw` method in `CrowfundingCampaign`
-- Add `getTierPrice` method in `CrowfundingCampaign`
-- Implement `Usdc` contract (only for dev and unit test)
-- Implement new tasks (only for dev)
-  - `approveAllowance`
-  - `faucet`
-- Update `README` file
-- Update deploy scrpits
+- Implement `setBoost` method in `CrowfundingCampaign` and `TuneTogether`
 - Update tests
 ---
 
 <details>
   <summary>See old changelog</summary>
+
+  ## 0.9.1 (2023-07-14)
+
+  ### fix: Update script to fix issue on mumbai testnet
+
+  - Update `01_genesisProject` script to fix issue on mumbai testnet
+  - Update `.gitignore` files
+  ---
+
+  ## 0.9.0 (2023-07-14)
+
+  ### feat: Implement mint in USDC
+
+  - Update `mint` method in `CrowfundingCampaign` to accept USDC
+  - Add `withdraw` method in `CrowfundingCampaign`
+  - Add `getTierPrice` method in `CrowfundingCampaign`
+  - Implement `Usdc` contract (only for dev and unit test)
+  - Implement new tasks (only for dev)
+    - `approveAllowance`
+    - `faucet`
+  - Update `README` file
+  - Update deploy scrpits
+  - Update tests
+  ---
 
   ## 0.8.0 (2023-07-12)
 
