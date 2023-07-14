@@ -5,6 +5,7 @@ import { HardhatEthersSigner } from '@nomicfoundation/hardhat-ethers/signers'
 import { loadFixture } from '@nomicfoundation/hardhat-toolbox/network-helpers'
 import { artistName, baseUri, bio, description, fees, campaignName, nbTiers } from './constants'
 import { TuneTogetherFixture } from './interfaces'
+import { time } from '@nomicfoundation/hardhat-network-helpers'
 
 describe('TuneTogether', () => {
   async function deployFixture(): Promise<TuneTogetherFixture> {
@@ -25,6 +26,45 @@ describe('TuneTogether', () => {
     await campaignFactory.setOwnerContractAddr(tuneTogetherAddr)
 
     return { tuneTogether, campaignFactory, owner, artist }
+  }
+
+  async function deployFixtureWithCampaign(): Promise<TuneTogetherFixture> {
+    const { tuneTogether, campaignFactory, owner, artist } = await loadFixture(deployFixture)
+
+    const decimals = 10**6
+    const tierOne = 1 * decimals
+    const tierTwo = 20 * decimals
+    const tierThree = 50 * decimals
+    const tierFour = 100 * decimals
+
+    const tx = await tuneTogether.connect(artist).createNewCampaign(
+      campaignName,
+      description,
+      fees,
+      artistName,
+      bio,
+      baseUri,
+      nbTiers
+    )
+
+    const result = await tx.wait();
+
+    // Get the CampaignAdded event log by is index
+    const eventLog: any = result?.logs.find((log) => log.index == 2)
+    let crowdfundingCampaign
+    if (eventLog && eventLog.fragment.name == 'CampaignAdded') {
+      // Retrieve the campaign address created
+      const contractAddress: string = eventLog.args[1]
+      // getContractAt
+      crowdfundingCampaign = await ethers.getContractAt('CrowdfundingCampaign', contractAddress);
+
+      await crowdfundingCampaign.connect(artist).setTierPrice(1, tierOne)
+      await crowdfundingCampaign.connect(artist).setTierPrice(2, tierTwo)
+      await crowdfundingCampaign.connect(artist).setTierPrice(3, tierThree)
+      await crowdfundingCampaign.connect(artist).setTierPrice(4, tierFour)
+    }
+
+    return { tuneTogether, campaignFactory, crowdfundingCampaign, owner, artist }
   }
 
   describe('Deployment', () => {
@@ -484,6 +524,58 @@ describe('TuneTogether', () => {
           contractAddress
         )).to.be.revertedWith('Wrong fees option')
       }
+    })
+  })
+
+  describe('Boost', () => {
+    it('Should set boost', async () => {
+      const { tuneTogether, artist, crowdfundingCampaign } = await loadFixture(deployFixtureWithCampaign)
+      await crowdfundingCampaign?.connect(artist).startCampaign()
+      const contractAddress = await crowdfundingCampaign?.getAddress()
+      if(contractAddress) await expect(tuneTogether.connect(artist).setBoost(contractAddress, {value: 0.001})).to.emit(tuneTogether, 'CampaignBoosted')
+    })
+
+    it('Revert if not the campaign artist', async () => {
+      const { tuneTogether, owner, crowdfundingCampaign, artist } = await loadFixture(deployFixtureWithCampaign)
+      await crowdfundingCampaign?.connect(artist).startCampaign()
+      const contractAddress = await crowdfundingCampaign?.getAddress()
+
+      if(contractAddress) await expect(tuneTogether.connect(owner).setBoost(contractAddress, {value: 0.001})).to.be.revertedWith('You\'re not the campaign artist')
+    })
+
+    it('Revert if wrong value', async () => {
+      const { tuneTogether, owner, crowdfundingCampaign, artist } = await loadFixture(deployFixtureWithCampaign)
+      await crowdfundingCampaign?.connect(artist).startCampaign()
+      const contractAddress = await crowdfundingCampaign?.getAddress()
+
+      if(contractAddress) await expect(tuneTogether.connect(owner).setBoost(contractAddress, {value: 0.002})).to.be.revertedWith('Wrong value')
+    })
+
+    it('Revert if Artist didn\'t start the campaign yet', async () => {
+      const { tuneTogether, owner, crowdfundingCampaign } = await loadFixture(deployFixtureWithCampaign)
+      const contractAddress = crowdfundingCampaign?.getAddress()
+
+      if(contractAddress) await expect(tuneTogether.connect(owner).setBoost(contractAddress, {value: 0.001})).to.be.revertedWith('Artist didn\'t start the campaign yet')
+    })
+
+    it('Revert if campaign closed', async () => {
+      const { tuneTogether, owner, crowdfundingCampaign, artist } = await loadFixture(deployFixtureWithCampaign)
+      const contractAddress = crowdfundingCampaign?.getAddress()
+      await crowdfundingCampaign?.connect(artist).startCampaign()
+      await crowdfundingCampaign?.connect(artist).closeCampaign()
+
+      if(contractAddress) await expect(tuneTogether.connect(owner).setBoost(contractAddress, {value: 0.001})).to.be.revertedWith('Campaign closed')
+    })
+
+    it('Revert if campaign ended', async () => {
+      const { tuneTogether, owner, crowdfundingCampaign, artist } = await loadFixture(deployFixtureWithCampaign)
+      const contractAddress = crowdfundingCampaign?.getAddress()
+      await crowdfundingCampaign?.connect(artist).startCampaign()
+
+      // Advance time by 8 weeks and mine a new block
+      await time.increase(4838420);
+
+      if(contractAddress) await expect(tuneTogether.connect(owner).setBoost(contractAddress, {value: 0.001})).to.be.revertedWith('Campaign ended')
     })
   })
 })

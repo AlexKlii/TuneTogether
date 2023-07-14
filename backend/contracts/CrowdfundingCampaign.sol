@@ -21,6 +21,7 @@ contract CrowdfundingCampaign is ERC1155, ERC1155Burnable, ERC1155Supply {
     uint8   public fees;
     address public artistAddress;
     uint8   public nbTiers;
+    uint    public boost;
 
     mapping(uint8 => uint) private tierPrices;
 
@@ -29,6 +30,7 @@ contract CrowdfundingCampaign is ERC1155, ERC1155Burnable, ERC1155Supply {
     event CampaignInfoUpdated(string _name, string _description, uint8 _fees);
     event TierPriceAdded(uint8 _id, uint _price);
     event FundWithdraw(address _artistAddr, uint _usdcBalance, uint _ethBalance, uint _timestamp);
+    event Boosted(uint _timestamp);
 
     modifier isContractOwner() {
         require(_tuneTogetherAddr == msg.sender, 'You\'re not the owner');
@@ -98,11 +100,6 @@ contract CrowdfundingCampaign is ERC1155, ERC1155Burnable, ERC1155Supply {
     }
 
     function updateCampaignInfo(string memory _name, string memory _description, uint8 _fees) external isContractOwner campaignNotStarted {
-        require(bytes(_name).length >= 5, 'Name too short');
-        require(bytes(_name).length <= 20, 'Name too long');
-        require(bytes(_description).length >= 10, 'Description too short');
-        require(_fees == 0 || _fees == 5 || _fees == 10, 'Wrong fees option');
-
         description = _description;
         name = _name;
         fees = _fees;
@@ -132,16 +129,19 @@ contract CrowdfundingCampaign is ERC1155, ERC1155Burnable, ERC1155Supply {
         return tierPrices[_id];
     }
 
+    function setBoost(uint _timestamp) external isContractOwner campaignInProgress {
+        boost = _timestamp;
+        emit Boosted(boost);
+    }
+
     function withdraw() external onlyArtist campaignClosed {
         uint ethBalance = address(this).balance;
         uint usdcBalance = _usdc.balanceOf(address(this));
 
         _usdc.transfer(msg.sender, usdcBalance);
         
-        if (ethBalance > 0) {
-            (bool success, ) = msg.sender.call{value: ethBalance}('');
-            require(success, "Withdraw failed");
-        }
+        (bool success, ) = msg.sender.call{value: ethBalance}('');
+        require(success, "Withdraw failed");
 
         emit FundWithdraw(msg.sender, usdcBalance, ethBalance, block.timestamp);
     }

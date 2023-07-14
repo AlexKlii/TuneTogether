@@ -22,6 +22,7 @@ export interface TuneTogetherFixture {
     artist: HardhatEthersSigner
     tuneTogether: TuneTogether
     campaignFactory: CampaignFactory
+    crowdfundingCampaign?: CrowdfundingCampaign
 }
 
 export interface UsdcFixture {

@@ -16,6 +16,7 @@ contract TuneTogether {
         uint8 fees;
         uint8 nbTiers;
         address artist;
+        uint boost;
     }
 
     struct Artist {
@@ -30,6 +31,7 @@ contract TuneTogether {
     event ArtistCreated(address _artistAddr);
     event CampaignAdded(address _artistAddr, address _campaignAddr);
     event CampaignUpdated(address _campaignAddr);
+    event CampaignBoosted(address _contractAddr, uint _timestamp);
 
     constructor(address _campaignFactoryAddress, address usdcAddr_) {
         _campaignFactory = CampaignFactory(_campaignFactoryAddress);
@@ -85,6 +87,20 @@ contract TuneTogether {
     function getOneCampaign(address _addr) external view returns (Campaign memory _campaigns) {
         return campaigns[_addr];
     }
+    
+    function setBoost(address _campaignAddr) external payable {
+        require(campaigns[_campaignAddr].artist == msg.sender, 'You\'re not the campaign artist');
+        require(msg.value == 0.001 ether, 'Wrong value');
+
+        _crowdfundingCampaign = CrowdfundingCampaign(_campaignAddr);
+
+        uint boost = block.timestamp + 1 weeks;
+        _crowdfundingCampaign.setBoost(boost);
+        
+        campaigns[_campaignAddr].boost = boost;
+        
+        emit CampaignBoosted(_campaignAddr, boost);
+    }
 
     function _setArtist(string memory _name, string memory _bio, uint8 _feeSchedule) private {
         Artist storage artist = artists[msg.sender];
@@ -96,7 +112,7 @@ contract TuneTogether {
     }
 
     function _setCampaign(address _addr, string memory _name, uint8 _fees, string memory _description, uint8 _nbTiers) private {
-        Campaign memory campaign = Campaign(_name, _description, _fees, _nbTiers, msg.sender);
+        Campaign memory campaign = Campaign(_name, _description, _fees, _nbTiers, msg.sender, 0);
         campaigns[_addr] = campaign;
     }
 }
