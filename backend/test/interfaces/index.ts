@@ -1,5 +1,5 @@
 import { HardhatEthersSigner } from '@nomicfoundation/hardhat-ethers/signers'
-import { CrowdfundingCampaign, CampaignFactory, TuneTogether } from "../../typechain-types"
+import { CrowdfundingCampaign, CampaignFactory, TuneTogether, Usdc } from "../../typechain-types"
 
 export interface CrowdfundingCampaignFixture {
     owner: HardhatEthersSigner
@@ -14,6 +14,7 @@ export interface CampaignFactoryFixture {
     artist: HardhatEthersSigner
     tuneTogetherContract: HardhatEthersSigner
     campaignFactory: CampaignFactory
+    usdcAddr: string
 }
 
 export interface TuneTogetherFixture {
@@ -21,4 +22,9 @@ export interface TuneTogetherFixture {
     artist: HardhatEthersSigner
     tuneTogether: TuneTogether
     campaignFactory: CampaignFactory
+}
+
+export interface UsdcFixture {
+    owner: HardhatEthersSigner
+    usdc: Usdc
 }

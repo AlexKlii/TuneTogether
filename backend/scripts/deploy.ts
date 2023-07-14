@@ -1,6 +1,6 @@
 import { ethers } from 'hardhat'
 import { HardhatEthersSigner } from '@nomicfoundation/hardhat-ethers/signers'
-import { CampaignFactory, TuneTogether } from '../typechain-types'
+import { CampaignFactory, TuneTogether, Usdc } from '../typechain-types'
 
 async function main() {
   const [owner]: HardhatEthersSigner[] = await ethers.getSigners()
@@ -16,12 +16,24 @@ async function main() {
 
   console.log(`CampaignFactory deployed to ${campaignFactoryAddress}`)
 
+  /* ****************************************************************** */
+  /* **********           Deploy USDC Contract            ************* */
+  /* ****************************************************************** */
+  const Usdc = await ethers.getContractFactory('Usdc')
+  const usdc: Usdc = await Usdc.connect(owner).deploy()
+
+  await usdc.waitForDeployment()
+  const usdcAddr = await usdc.getAddress()
+
+  await usdc.faucet(owner.address, 420 * 10**6)
+
+  console.log(`USDC deployed to ${usdcAddr}`)
 
   /* ****************************************************************** */
   /* **********            Deploy TuneTogether            ************* */
   /* ****************************************************************** */
   const TuneTogether = await ethers.getContractFactory('TuneTogether')
-  const tuneTogether: TuneTogether = await TuneTogether.connect(owner).deploy(campaignFactoryAddress)
+  const tuneTogether: TuneTogether = await TuneTogether.connect(owner).deploy(campaignFactoryAddress, usdcAddr)
 
   await tuneTogether.waitForDeployment()
   const tuneTogetherAddress = await tuneTogether.getAddress()

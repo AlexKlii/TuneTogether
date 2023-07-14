@@ -88,4 +88,20 @@ cd ../frontend
 npm run dev
 ```
 
+### Run tasks
+
+Some tasks was created to help you in testnet environement:
+
+* Approve Allowance
+
+```shell
+npx hardhat approveAllowance --network NETWORK --usdc USDC_ADDR --amount AMOUNT_TO_ALLOW --from USER_ADDR --sender CROWFUNDING_CAMPAIGN_ADDR
+```
+
+* Faucet USDC
+
+```shell
+npx hardhat faucet --network NETWORK --usdc USDC_ADDR --amount AMOUNT_TO_SEND --recipient USER_ADDR
+```
+
 Open [localhost:3000](http://localhost:3000) on you're browser to see the result.

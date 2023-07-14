@@ -1,10 +1,13 @@
-import { HardhatUserConfig } from "hardhat/config";
-import "@nomicfoundation/hardhat-toolbox";
-require("dotenv").config();
+import { HardhatUserConfig, task } from 'hardhat/config'
+import '@nomicfoundation/hardhat-toolbox'
+require('dotenv').config()
+
+import './tasks/approveAllowance'
+import './tasks/faucet'
 
 const config: HardhatUserConfig = {
   solidity: {
-    version: "0.8.19",
+    version: '0.8.19',
     settings: {
       optimizer: {
         enabled: true,
@@ -14,7 +17,7 @@ const config: HardhatUserConfig = {
   },
   networks: {
     localhost: {
-      url: "http://127.0.0.1:8545",
+      url: 'http://127.0.0.1:8545',
       chainId: 31337
     },
     sepolia: {
@@ -27,6 +30,6 @@ const config: HardhatUserConfig = {
       accounts: [`${process.env.PRIVATE_KEY}`]
     }
   },
-};
+}
 
-export default config;
+export default config

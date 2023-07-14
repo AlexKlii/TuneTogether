@@ -1,4 +1,4 @@
-import { CampaignFactory, CrowdfundingCampaign, TuneTogether } from '../typechain-types'
+import { CampaignFactory, CrowdfundingCampaign, TuneTogether, Usdc } from '../typechain-types'
 import { expect } from 'chai'
 import { ethers } from 'hardhat'
 import { HardhatEthersSigner } from '@nomicfoundation/hardhat-ethers/signers'
@@ -8,35 +8,49 @@ import { CrowdfundingCampaignFixture } from './interfaces'
 import { time } from '@nomicfoundation/hardhat-network-helpers'
 
 describe('CrowdfundingCampaign', () => {
-  const lowEther = ethers.parseEther("0.000001")
-  const oneEther = ethers.parseEther("1")
-  const twoEther = ethers.parseEther("2")
-  const threeEther = ethers.parseEther("3")
-  const fourEther = ethers.parseEther("4")
+  const decimals = 10**6
+
+  const lowUSDC = 0.5 * decimals
+  const tierOne = 1 * decimals
+  const tierTwo = 20 * decimals
+  const tierThree = 50 * decimals
+  const tierFour = 100 * decimals
 
   async function deployFixture(): Promise<CrowdfundingCampaignFixture> {
-    const CrowdfundingCampaign = await ethers.getContractFactory('CrowdfundingCampaign')
     const [owner, artist, investor, tuneTogether]: HardhatEthersSigner[] = await ethers.getSigners()
+    
+    const USDC = await ethers.getContractFactory('Usdc')
+    const usdc: Usdc = await USDC.connect(owner).deploy()
+    const usdcAddr: string = await usdc.getAddress();
+
+    const CrowdfundingCampaign = await ethers.getContractFactory('CrowdfundingCampaign')
   
     const crowdfundingCampaign: CrowdfundingCampaign = await CrowdfundingCampaign.connect(owner).deploy(
       baseUri,
       tuneTogether.address,
+      usdcAddr,
       artist.address,
       campaignName,
       fees,
       description,
-      nbTiers,
+      nbTiers
     )
+
+    const crowdfundingCampaignAddr: string = await crowdfundingCampaign.getAddress()
+    
+    // Giving some USDC to the investor for mint NFTs and approve allowance
+    await usdc.faucet(investor.address, 420 * decimals)
+    await usdc.connect(investor).approve(crowdfundingCampaignAddr, 420 * decimals)
 
     return { crowdfundingCampaign, owner, artist, investor, tuneTogether }
   }
 
   async function deployFixtureWithCampaign(): Promise<CrowdfundingCampaignFixture> {
     const { crowdfundingCampaign, owner, artist, investor, tuneTogether } = await loadFixture(deployFixture)
-    await crowdfundingCampaign.connect(artist).setTierPrice(1, oneEther)
-    await crowdfundingCampaign.connect(artist).setTierPrice(2, twoEther)
-    await crowdfundingCampaign.connect(artist).setTierPrice(3, threeEther)
-    await crowdfundingCampaign.connect(artist).setTierPrice(4, fourEther)
+    await crowdfundingCampaign.connect(artist).setTierPrice(1, tierOne)
+    await crowdfundingCampaign.connect(artist).setTierPrice(2, tierTwo)
+    await crowdfundingCampaign.connect(artist).setTierPrice(3, tierThree)
+    await crowdfundingCampaign.connect(artist).setTierPrice(4, tierFour)
     await crowdfundingCampaign.connect(artist).startCampaign()
 
     return { crowdfundingCampaign, owner, artist, investor, tuneTogether }
@@ -80,10 +94,10 @@ describe('CrowdfundingCampaign', () => {
   describe('Start Campaign', () => {
     it('Should start the campaign', async () => {
       const { crowdfundingCampaign, artist } = await loadFixture(deployFixture)
-      await crowdfundingCampaign.connect(artist).setTierPrice(1, oneEther)
-      await crowdfundingCampaign.connect(artist).setTierPrice(2, twoEther)
-      await crowdfundingCampaign.connect(artist).setTierPrice(3, threeEther)
-      await crowdfundingCampaign.connect(artist).setTierPrice(4, fourEther)
+      await crowdfundingCampaign.connect(artist).setTierPrice(1, tierOne)
+      await crowdfundingCampaign.connect(artist).setTierPrice(2, tierTwo)
+      await crowdfundingCampaign.connect(artist).setTierPrice(3, tierThree)
+      await crowdfundingCampaign.connect(artist).setTierPrice(4, tierFour)
       await expect(crowdfundingCampaign.connect(artist).startCampaign()).to.emit(crowdfundingCampaign, 'CampaignStarted')
     })
 
@@ -215,72 +229,83 @@ describe('CrowdfundingCampaign', () => {
 
   describe('Mint', () => {
     it('Should mint', async () => {
-      const { crowdfundingCampaign, artist, investor } = await loadFixture(deployFixtureWithCampaign)
-      await expect(crowdfundingCampaign.connect(investor).mint(1, 4, {value : fourEther})).to.emit(crowdfundingCampaign, 'TransferSingle')
-    })
-
-    it('Revert if wrong value', async () => {
-      const { crowdfundingCampaign, artist, investor } = await loadFixture(deployFixtureWithCampaign)
-      await expect(crowdfundingCampaign.connect(investor).mint(1, 4, {value : oneEther})).to.be.revertedWith('Wrong value')
+      const { crowdfundingCampaign, investor } = await loadFixture(deployFixtureWithCampaign)
+      await expect(crowdfundingCampaign.connect(investor).mint(1, 4)).to.emit(crowdfundingCampaign, 'TransferSingle')
     })
 
     it("Revert if campaign not start", async () => {
       const { crowdfundingCampaign, investor } = await loadFixture(deployFixture)
-      await expect(crowdfundingCampaign.connect(investor).mint(1, 4, {value : fourEther})).to.be.revertedWith('Artist didn\'t start the campaign yet');
+      await expect(crowdfundingCampaign.connect(investor).mint(2, 4)).to.be.revertedWith('Artist didn\'t start the campaign yet');
     })
 
     it("Revert if campaign closed", async () => {
       const { crowdfundingCampaign, artist, investor } = await loadFixture(deployFixtureWithCampaign)
       await crowdfundingCampaign.connect(artist).closeCampaign()
-      await expect(crowdfundingCampaign.connect(investor).mint(1, 4, {value : fourEther})).to.be.revertedWith('Campaign closed');
+      await expect(crowdfundingCampaign.connect(investor).mint(3, 4)).to.be.revertedWith('Campaign closed');
+    })
+
+    it('Revert if not enough balance', async () => {
+      const { crowdfundingCampaign, investor } = await loadFixture(deployFixtureWithCampaign)
+      await expect(crowdfundingCampaign.connect(investor).mint(4, 5)).to.be.revertedWith('Not enough balance')
     })
 
     it("Revert if campaign ended", async () => {
-      const { crowdfundingCampaign, artist, investor } = await loadFixture(deployFixtureWithCampaign)
+      const { crowdfundingCampaign, investor } = await loadFixture(deployFixtureWithCampaign)
 
       // Advance time by 8 weeks and mine a new block
       await time.increase(4838420);
 
-      await expect(crowdfundingCampaign.connect(investor).mint(1, 4, {value : fourEther})).to.be.revertedWith('Campaign ended');
+      await expect(crowdfundingCampaign.connect(investor).mint(1, 4)).to.be.revertedWith('Campaign ended');
     })
   })
 
   describe('Tier Prices', () => {
     it('Should set tier price', async () => {
       const { crowdfundingCampaign, artist } = await loadFixture(deployFixture)
-      await expect(crowdfundingCampaign.connect(artist).setTierPrice(1, oneEther)).to.emit(crowdfundingCampaign, 'TierPriceAdded').withArgs(1, oneEther)
+      await expect(crowdfundingCampaign.connect(artist).setTierPrice(1, tierOne)).to.emit(crowdfundingCampaign, 'TierPriceAdded').withArgs(1, tierOne)
     })
 
     it('Revert if not the Artist of the campaign', async () => {
       const { crowdfundingCampaign, owner } = await loadFixture(deployFixture)
-      await expect(crowdfundingCampaign.connect(owner).setTierPrice(1, oneEther)).to.be.revertedWith('You\'re not the campaign artist')
+      await expect(crowdfundingCampaign.connect(owner).setTierPrice(1, tierOne)).to.be.revertedWith('You\'re not the campaign artist')
     })
 
     it('Revert if campaign already started', async () => {
       const { crowdfundingCampaign, artist } = await loadFixture(deployFixtureWithCampaign)
-      await expect(crowdfundingCampaign.connect(artist).setTierPrice(1, oneEther)).to.be.revertedWith('Campaign already started')
+      await expect(crowdfundingCampaign.connect(artist).setTierPrice(1, tierOne)).to.be.revertedWith('Campaign already started')
     })
 
     it('Revert if tier does not exist', async () => {
       const { crowdfundingCampaign, artist } = await loadFixture(deployFixture)
-      await expect(crowdfundingCampaign.connect(artist).setTierPrice(42, oneEther)).to.be.revertedWith('Tier does not exist')
+      await expect(crowdfundingCampaign.connect(artist).setTierPrice(42, tierOne)).to.be.revertedWith('Tier does not exist')
     })
 
     it('Revert if price too low', async () => {
       const { crowdfundingCampaign, artist } = await loadFixture(deployFixture)
-      await expect(crowdfundingCampaign.connect(artist).setTierPrice(1, lowEther)).to.be.revertedWith('Price too low')
+      await expect(crowdfundingCampaign.connect(artist).setTierPrice(1, lowUSDC)).to.be.revertedWith('Price too low')
     })
 
     it('Revert if price not higher than the previous tier', async () => {
       const { crowdfundingCampaign, artist } = await loadFixture(deployFixture)
-      await crowdfundingCampaign.connect(artist).setTierPrice(1, twoEther)
-      await expect(crowdfundingCampaign.connect(artist).setTierPrice(2, oneEther)).to.be.revertedWith('Price should be higher than the previous tier')
+      await crowdfundingCampaign.connect(artist).setTierPrice(1, tierTwo)
+      await expect(crowdfundingCampaign.connect(artist).setTierPrice(2, tierOne)).to.be.revertedWith('Price should be higher than the previous tier')
     })
 
     it('Revert if price higher than the next tier', async () => {
       const { crowdfundingCampaign, artist } = await loadFixture(deployFixture)
-      await crowdfundingCampaign.connect(artist).setTierPrice(2, oneEther)
-      await expect(crowdfundingCampaign.connect(artist).setTierPrice(1, twoEther)).to.be.revertedWith('Price should be lower than the next tier')
+      await crowdfundingCampaign.connect(artist).setTierPrice(2, tierOne)
+      await expect(crowdfundingCampaign.connect(artist).setTierPrice(1, tierTwo)).to.be.revertedWith('Price should be lower than the next tier')
+    })
+  })
+
+  describe('Withdraw', () => {
+    it('Should withdraw fund', async () => {
+      const { crowdfundingCampaign, artist, investor } = await loadFixture(deployFixtureWithCampaign)
+      
+      await crowdfundingCampaign.connect(investor).mint(1, 4)
+      await crowdfundingCampaign.connect(artist).closeCampaign()
+
+      await expect(crowdfundingCampaign.connect(artist).withdraw()).to.emit(crowdfundingCampaign, 'FundWithdraw')
     })
   })
 })

@@ -1,4 +1,4 @@
-import { CampaignFactory, TuneTogether } from '../typechain-types'
+import { CampaignFactory, TuneTogether, Usdc } from '../typechain-types'
 import { expect } from 'chai'
 import { ethers } from 'hardhat'
 import { HardhatEthersSigner } from '@nomicfoundation/hardhat-ethers/signers'
@@ -13,10 +13,14 @@ describe('TuneTogether', () => {
     const CampaignFactory = await ethers.getContractFactory('CampaignFactory')
     const campaignFactory: CampaignFactory = await CampaignFactory.connect(owner).deploy()
 
+    const USDC = await ethers.getContractFactory('Usdc')
+    const usdc: Usdc = await USDC.connect(owner).deploy()
+    const usdcAddr: string = await usdc.getAddress();
+
     const TuneTogether = await ethers.getContractFactory('TuneTogether')
     const campaignFactoryAddr = await campaignFactory.getAddress()
 
-    const tuneTogether: TuneTogether = await TuneTogether.connect(owner).deploy(campaignFactoryAddr)
+    const tuneTogether: TuneTogether = await TuneTogether.connect(owner).deploy(campaignFactoryAddr, usdcAddr)
     const tuneTogetherAddr: string = await tuneTogether.getAddress()
     await campaignFactory.setOwnerContractAddr(tuneTogetherAddr)
 
@@ -32,7 +36,7 @@ describe('TuneTogether', () => {
 
   describe('Create a new CrowdfundingCampaign', () => {
     it('Should emit CrowdfundingCampaignCreated', async () => {
-      const { tuneTogether, campaignFactory } = await loadFixture(deployFixture)
+      const { tuneTogether } = await loadFixture(deployFixture)
       // Create campaign with 0% fees
       await expect(tuneTogether.createNewCampaign(
         campaignName,
@@ -323,6 +327,12 @@ describe('TuneTogether', () => {
           10,
           contractAddress
         )).to.emit(tuneTogether, 'CampaignUpdated').withArgs(contractAddress)
+
+        const campaign = await tuneTogether.getOneCampaign(contractAddress)
+
+        expect(campaign.name).to.equal('new name')
+        expect(campaign.description).to.equal('Update campaign with 10% fees')
+        expect(campaign.fees).to.equal(10)
       }
     })
 
