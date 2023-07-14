@@ -59,6 +59,12 @@ npx hardhat test
 npx hardhat coverage
 ```
 
+#### Generate doc from natspec
+
+```shell
+npx hardhat docgen
+```
+
 ### Launch the project locally
 
 Open a terminal and run the following command from the `backend` directory:

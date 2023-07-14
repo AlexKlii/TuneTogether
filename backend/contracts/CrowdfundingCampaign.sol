@@ -7,6 +7,8 @@ import '../node_modules/@openzeppelin/contracts/token/ERC1155/extensions/ERC1155
 import '../node_modules/@openzeppelin/contracts/utils/Strings.sol';
 import '../node_modules/@openzeppelin/contracts/token/ERC20/IERC20.sol';
 
+/// @title CrowdfundingCampaign Contract
+/// @dev A contract for managing crowdfunding campaigns and token minting.
 contract CrowdfundingCampaign is ERC1155, ERC1155Burnable, ERC1155Supply {
     string  private _baseUri;
     uint256 private _endTimestamp;
@@ -32,21 +34,25 @@ contract CrowdfundingCampaign is ERC1155, ERC1155Burnable, ERC1155Supply {
     event FundWithdraw(address _artistAddr, uint _usdcBalance, uint _ethBalance, uint _timestamp);
     event Boosted(uint _timestamp);
 
+    /// @dev Throws if the caller is not the contract owner.
     modifier isContractOwner() {
         require(_tuneTogetherAddr == msg.sender, 'You\'re not the owner');
         _;
     }
 
+    /// @dev Throws if the caller is not the campaign artist.
     modifier onlyArtist() {
         require(artistAddress == msg.sender, 'You\'re not the campaign artist');
         _;
     }
     
+    /// @dev Throws if the campaign has already started.
     modifier campaignNotStarted() {
         require(!_campaignStarted, 'Campaign already started');
         _;
     }
 
+    /// @dev Throws if the campaign is not in progress.
     modifier campaignInProgress() {
         require(_campaignStarted, 'Artist didn\'t start the campaign yet');
         require(_campaignInProgress, 'Campaign closed');
@@ -54,12 +60,22 @@ contract CrowdfundingCampaign is ERC1155, ERC1155Burnable, ERC1155Supply {
         _;
     }
 
+    /// @dev Throws if the campaign is not closed.
     modifier campaignClosed() {
         require(_campaignStarted, 'Artist didn\'t start the campaign yet');
         require(!_campaignInProgress || _endTimestamp < block.timestamp, 'Campaign in progress');
         _;
     }
 
+    /// @dev Initializes the CrowdfundingCampaign contract.
+    /// @param baseUri_ The base URI for the token metadata.
+    /// @param tuneTogetherAddr_ The address of the TuneTogether contract.
+    /// @param usdcAddr_ The address of the USDC token contract.
+    /// @param _artistAddr The address of the artist wallet.
+    /// @param _name The name of the campaign.
+    /// @param _fees The fees of the campaign.
+    /// @param _description The description of the campaign.
+    /// @param _nbTiers The number of tier prices in the campaign.
     constructor(string memory baseUri_, address tuneTogetherAddr_, address usdcAddr_, address _artistAddr, string memory _name, uint8 _fees, string memory _description, uint8 _nbTiers) ERC1155(baseUri_) {
         _baseUri = baseUri_;
         _tuneTogetherAddr = tuneTogetherAddr_;
@@ -71,6 +87,9 @@ contract CrowdfundingCampaign is ERC1155, ERC1155Burnable, ERC1155Supply {
         nbTiers = _nbTiers;
     }
 
+    /// @dev Mints a specific amount of tokens to the caller.
+    /// @param _id The ID of the token to mint.
+    /// @param _amount The amount of tokens to mint.
     function mint(uint8 _id, uint256 _amount) public campaignInProgress {
         require(_usdc.balanceOf(msg.sender) >= _amount * tierPrices[_id], "Not enough balance");
 
@@ -78,10 +97,14 @@ contract CrowdfundingCampaign is ERC1155, ERC1155Burnable, ERC1155Supply {
         _mint(msg.sender, _id, _amount, '');
     }
 
-    function uri(uint _tokenId) public view override returns (string memory) {
+    /// @dev Returns the token URI for a given token ID.
+    /// @param _tokenId The ID of the token.
+    /// @return _uri The URI of the token metadata.
+    function uri(uint _tokenId) public view override returns (string memory _uri) {
         return string(abi.encodePacked(_baseUri, Strings.toString(_tokenId), '.json'));
     }
 
+    /// @dev Starts the crowdfunding campaign.
     function startCampaign() external onlyArtist campaignNotStarted {
         require(nbTiers == _nbFilledTiers, 'Missing tier prices');
 
@@ -94,11 +117,16 @@ contract CrowdfundingCampaign is ERC1155, ERC1155Burnable, ERC1155Supply {
         emit CampaignStarted(_startTimestamp, _endTimestamp);
     }
 
+    /// @dev Closes the crowdfunding campaign.
     function closeCampaign() external onlyArtist campaignInProgress {
         _campaignInProgress = false;
         emit CampaignClosed(block.timestamp);
     }
 
+    /// @dev Updates the campaign information.
+    /// @param _name The updated name of the campaign.
+    /// @param _description The updated description of the campaign.
+    /// @param _fees The updated fees of the campaign.
     function updateCampaignInfo(string memory _name, string memory _description, uint8 _fees) external isContractOwner campaignNotStarted {
         description = _description;
         name = _name;
@@ -107,6 +135,9 @@ contract CrowdfundingCampaign is ERC1155, ERC1155Burnable, ERC1155Supply {
         emit CampaignInfoUpdated(name, description, fees);
     }
 
+    /// @dev Sets the price for a specific tier in the campaign.
+    /// @param _id The ID of the tier.
+    /// @param _price The price of the tier.
     function setTierPrice(uint8 _id, uint _price) external onlyArtist campaignNotStarted {
         require(_id > 0 && _id <= nbTiers, 'Tier does not exist');
         require(_price >= 1 * 10**6 , 'Price too low');
@@ -125,15 +156,21 @@ contract CrowdfundingCampaign is ERC1155, ERC1155Burnable, ERC1155Supply {
         emit TierPriceAdded(_id, _price);
     }
 
+    /// @dev Retrieves the price of a specific tier in the campaign.
+    /// @param _id The ID of the tier.
+    /// @return _price The price of the tier.
     function getTierPrice(uint8 _id) external view returns (uint _price) {
         return tierPrices[_id];
     }
 
+    /// @dev Sets the boost timestamp for the campaign.
+    /// @param _timestamp The boost timestamp.
     function setBoost(uint _timestamp) external isContractOwner campaignInProgress {
         boost = _timestamp;
         emit Boosted(boost);
     }
 
+    /// @dev Withdraws funds from the campaign.
     function withdraw() external onlyArtist campaignClosed {
         uint ethBalance = address(this).balance;
         uint usdcBalance = _usdc.balanceOf(address(this));
@@ -146,7 +183,13 @@ contract CrowdfundingCampaign is ERC1155, ERC1155Burnable, ERC1155Supply {
         emit FundWithdraw(msg.sender, usdcBalance, ethBalance, block.timestamp);
     }
 
-    // The following functions are overrides required by Solidity.
+    /// @dev The following functions are overrides required by Solidity. Hook function called before any token transfer.
+    /// @param _operator The address performing the operation.
+    /// @param _from The address transferring the tokens.
+    /// @param _to The address receiving the tokens.
+    /// @param _ids The IDs of the tokens being transferred.
+    /// @param _amounts The amounts of tokens being transferred.
+    /// @param _data Additional data.
     function _beforeTokenTransfer(address _operator, address _from, address _to, uint256[] memory _ids, uint256[] memory _amounts, bytes memory _data) internal override(ERC1155, ERC1155Supply) {
         super._beforeTokenTransfer(_operator,_from,_to,_ids,_amounts,_data);
     }

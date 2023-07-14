@@ -4,6 +4,8 @@ pragma solidity 0.8.19;
 import './CampaignFactory.sol';
 import './CrowdfundingCampaign.sol';
 
+/// @title TuneTogether Contract
+/// @dev A contract for managing campaigns and artists.
 contract TuneTogether {
     CampaignFactory private _campaignFactory;
     CrowdfundingCampaign private _crowdfundingCampaign;
@@ -33,11 +35,22 @@ contract TuneTogether {
     event CampaignUpdated(address _campaignAddr);
     event CampaignBoosted(address _contractAddr, uint _timestamp);
 
+    /// @dev Initializes the TuneTogether contract.
+    /// @param _campaignFactoryAddress The address of the CampaignFactory contract.
+    /// @param usdcAddr_ The address of the USDC token contract.
     constructor(address _campaignFactoryAddress, address usdcAddr_) {
         _campaignFactory = CampaignFactory(_campaignFactoryAddress);
         _usdcAddr = usdcAddr_;
     }
 
+    /// @dev Creates a new campaign and associates it with an artist.
+    /// @param _campaignName The name of the campaign.
+    /// @param _description The description of the campaign.
+    /// @param _fees The fees of the campaign.
+    /// @param _artistName The name of the artist.
+    /// @param _bio The bio of the artist.
+    /// @param _uri The URI of the campaign metadata.
+    /// @param _nbTiers The number of tier prices in the campaign.
     function createNewCampaign(string memory _campaignName, string memory _description, uint8 _fees, string memory _artistName, string memory _bio, string memory _uri, uint8 _nbTiers) external {
         require(bytes(_campaignName).length >= 5, 'Campaign name too short');
         require(bytes(_campaignName).length <= 20, 'Campaign name too long');
@@ -59,6 +72,11 @@ contract TuneTogether {
         }
     }
 
+    /// @dev Updates the information of a campaign.
+    /// @param _name The updated name of the campaign.
+    /// @param _description The updated description of the campaign.
+    /// @param _fees The updated fees of the campaign.
+    /// @param _addr The address of the campaign to update.
     function updateCampaignInfo(string memory _name, string memory _description, uint8 _fees, address _addr) external {
         require(campaigns[_addr].artist == msg.sender, 'You\'re not the campaign artist');
         require(bytes(_name).length >= 5, 'Name too short');
@@ -76,18 +94,30 @@ contract TuneTogether {
         emit CampaignUpdated(_addr);
     }
 
-    function isArtist(address _addr) external view returns (bool) {
+    /// @dev Checks if an address belongs to an artist.
+    /// @param _addr The address to check.
+    /// @return _isArtist A boolean indicating whether the address is associated with an artist.
+    function isArtist(address _addr) external view returns (bool _isArtist) {
         return bytes(artists[_addr].name).length != 0;
     }
 
+
+    /// @dev Retrieves the information of an artist.
+    /// @param _addr The address of the artist.
+    /// @return _artist The information of the artist.
     function getArtist(address _addr) external view returns (Artist memory _artist) {
         return artists[_addr];
     }
 
-    function getOneCampaign(address _addr) external view returns (Campaign memory _campaigns) {
+    /// @dev Retrieves the information of a specific campaign.
+    /// @param _addr The address of the campaign.
+    /// @return _campaign The information of the campaign.
+    function getOneCampaign(address _addr) external view returns (Campaign memory _campaign) {
         return campaigns[_addr];
     }
     
+    /// @dev Sets a boost for a campaign by the artist.
+    /// @param _campaignAddr The address of the campaign to boost.
     function setBoost(address _campaignAddr) external payable {
         require(campaigns[_campaignAddr].artist == msg.sender, 'You\'re not the campaign artist');
         require(msg.value == 0.001 ether, 'Wrong value');
@@ -102,6 +132,10 @@ contract TuneTogether {
         emit CampaignBoosted(_campaignAddr, boost);
     }
 
+    /// @dev Sets the information for an artist.
+    /// @param _name The name of the artist.
+    /// @param _bio The bio of the artist.
+    /// @param _feeSchedule The fee schedule of the artist.
     function _setArtist(string memory _name, string memory _bio, uint8 _feeSchedule) private {
         Artist storage artist = artists[msg.sender];
         artist.name = _name;
@@ -111,6 +145,12 @@ contract TuneTogether {
         emit ArtistCreated(msg.sender);
     }
 
+    /// @dev Sets the information for a campaign.
+    /// @param _addr The address of the campaign.
+    /// @param _name The name of the campaign.
+    /// @param _fees The fees of the campaign.
+    /// @param _description The description of the campaign.
+    /// @param _nbTiers The number of tier prices in the campaign.
     function _setCampaign(address _addr, string memory _name, uint8 _fees, string memory _description, uint8 _nbTiers) private {
         Campaign memory campaign = Campaign(_name, _description, _fees, _nbTiers, msg.sender, 0);
         campaigns[_addr] = campaign;

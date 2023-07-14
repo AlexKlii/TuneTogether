@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.10.1 (2023-07-14)
+
+### feat: Implement NATSPEC + DOC
+
+- Implement natspec in contracts
+- Add docs generate with `solidity-docgen`
+- Update `README` file
+---
+
 ## 0.10.0 (2023-07-14)
 
 ### feat: Boost Campaign
