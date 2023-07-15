@@ -6,7 +6,8 @@ export interface CrowdfundingCampaignFixture {
     artist: HardhatEthersSigner
     investor: HardhatEthersSigner
     tuneTogether: HardhatEthersSigner
-    crowdfundingCampaign: CrowdfundingCampaign
+    crowdfundingCampaign: CrowdfundingCampaign,
+    usdc: Usdc
 }
 
 export interface CampaignFactoryFixture {
@@ -22,7 +23,11 @@ export interface TuneTogetherFixture {
     artist: HardhatEthersSigner
     tuneTogether: TuneTogether
     campaignFactory: CampaignFactory
-    crowdfundingCampaign?: CrowdfundingCampaign
+}
+
+export interface TuneTogetherCampaignFixture extends TuneTogetherFixture {  
+    crowdfundingCampaign: CrowdfundingCampaign
+    campaignAddr: string
 }
 
 export interface UsdcFixture {

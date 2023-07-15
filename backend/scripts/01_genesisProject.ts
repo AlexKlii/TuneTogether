@@ -96,7 +96,8 @@ async function main() {
     'TuneTogether',
     'TuneTogether Artist bio',
     'ipfs://bafybeifs5oytiw5tq3d3wnzcnv5nnre5fqgpprgd7baybkdal3hruvuhlq/',
-    4
+    4,
+    100*10**6
   )
 
   console.log(`Create new Campaign...`)

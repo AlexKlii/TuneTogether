@@ -8,7 +8,7 @@ task('approveAllowance', 'Approve Allowance amount for an address')
     .addParam('usdc', 'USDC contract address')
     .addParam('amount', 'Amount to allow')
     .addParam('from', 'User wallet address')
-    .addParam('sender', 'CrowfundingCampaign contract address')
+    .addParam('sender', 'CrowdfundingCampaign contract address')
     .setAction(async (args, hre) => {
         console.log('Approve allowance...')
 

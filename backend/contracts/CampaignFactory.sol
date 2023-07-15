@@ -27,11 +27,12 @@ contract CampaignFactory is Ownable {
     /// @param _nbTiers The number of tier prices in the campaign.
     /// @param _usdcAddr The address of the USDC token contract.
     /// @return campaignAddress The address of the created crowdfunding campaign.
-    function createCrowdfundingCampaign(string memory _uri, address _artistAddr, string memory _name, uint8 _fees, string memory _description, uint8 _nbTiers, address _usdcAddr) external isContractOwner returns (address campaignAddress) {
+    /// @param _objectif The price objectif of the campaign.
+    function createCrowdfundingCampaign(string memory _uri, address _artistAddr, string memory _name, uint8 _fees, string memory _description, uint8 _nbTiers, address _usdcAddr, uint _objectif) external isContractOwner returns (address campaignAddress) {
         bytes32 salt = keccak256(abi.encodePacked(_uri, _artistAddr));
         bytes memory campaignBytecode = abi.encodePacked(
             type(CrowdfundingCampaign).creationCode,
-            abi.encode(_uri, _ownerContractAddr, _usdcAddr, _artistAddr, _name, _fees, _description, _nbTiers)
+            abi.encode(_uri, _ownerContractAddr, _usdcAddr, _artistAddr, _name, _fees, _description, _nbTiers, _objectif)
         );
 
         assembly {

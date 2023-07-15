@@ -2,14 +2,13 @@
 pragma solidity 0.8.19;
 
 import '../node_modules/@openzeppelin/contracts/token/ERC1155/ERC1155.sol';
-import '../node_modules/@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Burnable.sol';
 import '../node_modules/@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Supply.sol';
 import '../node_modules/@openzeppelin/contracts/utils/Strings.sol';
 import '../node_modules/@openzeppelin/contracts/token/ERC20/IERC20.sol';
 
 /// @title CrowdfundingCampaign Contract
 /// @dev A contract for managing crowdfunding campaigns and token minting.
-contract CrowdfundingCampaign is ERC1155, ERC1155Burnable, ERC1155Supply {
+contract CrowdfundingCampaign is ERC1155, ERC1155Supply {
     string  private _baseUri;
     uint256 private _endTimestamp;
     bool    private _campaignStarted;
@@ -24,6 +23,7 @@ contract CrowdfundingCampaign is ERC1155, ERC1155Burnable, ERC1155Supply {
     address public artistAddress;
     uint8   public nbTiers;
     uint    public boost;
+    uint    public objectif;
 
     mapping(uint8 => uint) private tierPrices;
 
@@ -76,7 +76,8 @@ contract CrowdfundingCampaign is ERC1155, ERC1155Burnable, ERC1155Supply {
     /// @param _fees The fees of the campaign.
     /// @param _description The description of the campaign.
     /// @param _nbTiers The number of tier prices in the campaign.
-    constructor(string memory baseUri_, address tuneTogetherAddr_, address usdcAddr_, address _artistAddr, string memory _name, uint8 _fees, string memory _description, uint8 _nbTiers) ERC1155(baseUri_) {
+    /// @param _objectif The price objectif of the campaign.
+    constructor(string memory baseUri_, address tuneTogetherAddr_, address usdcAddr_, address _artistAddr, string memory _name, uint8 _fees, string memory _description, uint8 _nbTiers, uint _objectif) ERC1155(baseUri_) {
         _baseUri = baseUri_;
         _tuneTogetherAddr = tuneTogetherAddr_;
         _usdc = IERC20(usdcAddr_);
@@ -85,6 +86,7 @@ contract CrowdfundingCampaign is ERC1155, ERC1155Burnable, ERC1155Supply {
         fees = _fees;
         description = _description;
         nbTiers = _nbTiers;
+        objectif = _objectif;
     }
 
     /// @dev Mints a specific amount of tokens to the caller.
@@ -147,7 +149,7 @@ contract CrowdfundingCampaign is ERC1155, ERC1155Burnable, ERC1155Supply {
         }
 
         if (_id < nbTiers && tierPrices[_id + 1] != 0) {
-            require((_price < tierPrices[_id + 1]), 'Price should be lower than the next tier');
+            require(_price < tierPrices[_id + 1], 'Price should be lower than the next tier');
         }
 
         tierPrices[_id] = _price;

@@ -1,24 +1,33 @@
 # Changelog
 
-## 0.10.1 (2023-07-14)
+## 0.11.0 (2023-07-15)
 
-### feat: Implement NATSPEC + DOC
+### feat: Implement Campaign Objectif
 
-- Implement natspec in contracts
-- Add docs generate with `solidity-docgen`
-- Update `README` file
----
-
-## 0.10.0 (2023-07-14)
-
-### feat: Boost Campaign
-
-- Implement `setBoost` method in `CrowfundingCampaign` and `TuneTogether`
+- Implement `objectif` in `CrowdfundingCampaign`
+- Update `_setArtist` method from `TuneTogether`
 - Update tests
 ---
 
 <details>
   <summary>See old changelog</summary>
+
+  ## 0.10.1 (2023-07-14)
+
+  ### feat: Implement NATSPEC + DOC
+
+  - Implement natspec in contracts
+  - Add docs generate with `solidity-docgen`
+  - Update `README` file
+  ---
+
+  ## 0.10.0 (2023-07-14)
+
+  ### feat: Boost Campaign
+
+  - Implement `setBoost` method in `CrowdfundingCampaign` and `TuneTogether`
+  - Update tests
+  ---
 
   ## 0.9.1 (2023-07-14)
 
@@ -32,9 +41,9 @@
 
   ### feat: Implement mint in USDC
 
-  - Update `mint` method in `CrowfundingCampaign` to accept USDC
-  - Add `withdraw` method in `CrowfundingCampaign`
-  - Add `getTierPrice` method in `CrowfundingCampaign`
+  - Update `mint` method in `CrowdfundingCampaign` to accept USDC
+  - Add `withdraw` method in `CrowdfundingCampaign`
+  - Add `getTierPrice` method in `CrowdfundingCampaign`
   - Implement `Usdc` contract (only for dev and unit test)
   - Implement new tasks (only for dev)
     - `approveAllowance`
@@ -46,7 +55,7 @@
 
   ## 0.8.0 (2023-07-12)
 
-  ### feat: Update Requirements for CrowfundingCampaign contract
+  ### feat: Update Requirements for CrowdfundingCampaign contract
 
   - Update requirements to `updateCampaignInfo` method
   - Implement `updateCampaignInfo` in `TuneTogether` contract
@@ -68,10 +77,10 @@
 
   ### feat: Implement Tier Prices
 
-  - Implement new method `setTierPrice` in `CrowfundingCampaign` contract
+  - Implement new method `setTierPrice` in `CrowdfundingCampaign` contract
   - Update `createNewCampaign` method requirements in `TuneTogether` contract
-  - Update `startCampaign` method requirements in `CrowfundingCampaign` contract
-  - Update `mint` method requirements in `CrowfundingCampaign` contract
+  - Update `startCampaign` method requirements in `CrowdfundingCampaign` contract
+  - Update `mint` method requirements in `CrowdfundingCampaign` contract
   - Update tests
   ---
 
