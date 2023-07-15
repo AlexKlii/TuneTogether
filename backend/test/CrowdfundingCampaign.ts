@@ -1,4 +1,4 @@
-import { CrowdfundingCampaign, MockReceiver, Usdc } from '../typechain-types'
+import { CrowdfundingCampaign, Usdc } from '../typechain-types'
 import { expect } from 'chai'
 import { ethers } from 'hardhat'
 import { HardhatEthersSigner } from '@nomicfoundation/hardhat-ethers/signers'
