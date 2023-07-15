@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
 
-import '../node_modules/@openzeppelin/contracts/token/ERC20/ERC20.sol';
+import '../../node_modules/@openzeppelin/contracts/token/ERC20/ERC20.sol';
 
 /// @title USDC Contract
 /// @dev A contract representing the USDC stablecoin.

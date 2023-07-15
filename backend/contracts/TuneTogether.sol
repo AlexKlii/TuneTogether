@@ -19,12 +19,14 @@ contract TuneTogether {
         uint8 nbTiers;
         address artist;
         uint boost;
+        uint objectif;
     }
 
     struct Artist {
         string name;
         string bio;
         uint8 feeSchedule;
+        address[] campaigns;
     }
 
     mapping(address => Artist) artists;
@@ -51,7 +53,8 @@ contract TuneTogether {
     /// @param _bio The bio of the artist.
     /// @param _uri The URI of the campaign metadata.
     /// @param _nbTiers The number of tier prices in the campaign.
-    function createNewCampaign(string memory _campaignName, string memory _description, uint8 _fees, string memory _artistName, string memory _bio, string memory _uri, uint8 _nbTiers) external {
+    /// @param _objectif The price objectif of the campaign.
+    function createNewCampaign(string memory _campaignName, string memory _description, uint8 _fees, string memory _artistName, string memory _bio, string memory _uri, uint8 _nbTiers, uint _objectif) external {
         require(bytes(_campaignName).length >= 5, 'Campaign name too short');
         require(bytes(_campaignName).length <= 20, 'Campaign name too long');
         require(bytes(_description).length >= 10, 'Campaign description too short');
@@ -61,15 +64,15 @@ contract TuneTogether {
         require(bytes(_bio).length >= 10, 'Artist bio too short');
         require(_nbTiers > 0, 'Not enough tier prices');
         require(_nbTiers <= 10, 'Too many tier prices');
+        require(_objectif >= 100*10**6, 'Objectif too low');
+        require(artists[msg.sender].campaigns.length < 10, 'Max number of campaign reached');
 
-        address _campaignAddr = _campaignFactory.createCrowdfundingCampaign(_uri, msg.sender, _campaignName, _fees, _description, _nbTiers, _usdcAddr);
+        address _campaignAddr = _campaignFactory.createCrowdfundingCampaign(_uri, msg.sender, _campaignName, _fees, _description, _nbTiers, _usdcAddr, _objectif);
        
-        _setCampaign(_campaignAddr, _campaignName, _fees, _description, _nbTiers);
+        _setCampaign(_campaignAddr, _campaignName, _fees, _description, _nbTiers, _objectif);
         emit CampaignAdded(msg.sender, _campaignAddr);
 
-        if (bytes(artists[msg.sender].name).length == 0) {
-            _setArtist(_artistName, _bio, _fees);
-        }
+        _setArtist(_artistName, _bio, _fees, _campaignAddr);
     }
 
     /// @dev Updates the information of a campaign.
@@ -136,13 +139,26 @@ contract TuneTogether {
     /// @param _name The name of the artist.
     /// @param _bio The bio of the artist.
     /// @param _feeSchedule The fee schedule of the artist.
-    function _setArtist(string memory _name, string memory _bio, uint8 _feeSchedule) private {
+    /// @param _campaignAddr The created campaign address.
+    function _setArtist(string memory _name, string memory _bio, uint8 _feeSchedule, address _campaignAddr) private {
         Artist storage artist = artists[msg.sender];
-        artist.name = _name;
-        artist.bio = _bio;
-        artist.feeSchedule = _feeSchedule;
+        if (bytes(artist.name).length == 0) {
+            artist.name = _name;
+            artist.bio = _bio;
+            artist.feeSchedule = _feeSchedule;
+            artist.campaigns = [_campaignAddr];
 
-        emit ArtistCreated(msg.sender);
+            emit ArtistCreated(msg.sender);
+        } else {
+            address[] memory artistCampaigns = new address[](artist.campaigns.length+1);
+
+            for (uint256 i = 0; i < artist.campaigns.length; i++) {
+                artistCampaigns[i] = artist.campaigns[i];
+            }
+            
+            artistCampaigns[artist.campaigns.length] = _campaignAddr;
+            artist.campaigns = artistCampaigns;
+        }
     }
 
     /// @dev Sets the information for a campaign.
@@ -151,8 +167,9 @@ contract TuneTogether {
     /// @param _fees The fees of the campaign.
     /// @param _description The description of the campaign.
     /// @param _nbTiers The number of tier prices in the campaign.
-    function _setCampaign(address _addr, string memory _name, uint8 _fees, string memory _description, uint8 _nbTiers) private {
-        Campaign memory campaign = Campaign(_name, _description, _fees, _nbTiers, msg.sender, 0);
+    /// @param _objectif The price objectif of the campaign.
+    function _setCampaign(address _addr, string memory _name, uint8 _fees, string memory _description, uint8 _nbTiers, uint _objectif) private {
+        Campaign memory campaign = Campaign(_name, _description, _fees, _nbTiers, msg.sender, 0, _objectif);
         campaigns[_addr] = campaign;
     }
 }

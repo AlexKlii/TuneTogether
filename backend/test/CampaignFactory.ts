@@ -3,7 +3,7 @@ import { expect } from 'chai'
 import { ethers } from 'hardhat'
 import { HardhatEthersSigner } from '@nomicfoundation/hardhat-ethers/signers'
 import { loadFixture } from '@nomicfoundation/hardhat-toolbox/network-helpers'
-import { baseUri, description, fees, campaignName, nbTiers } from './constants'
+import { baseUri, description, fees, campaignName, nbTiers, objectif } from './constants'
 import { CampaignFactoryFixture } from './interfaces'
 
 describe('CampaignFactory', () => {
@@ -46,7 +46,8 @@ describe('CampaignFactory', () => {
         fees,
         description,
         nbTiers,
-        usdcAddr
+        usdcAddr,
+        objectif
       )).to.emit(campaignFactory, 'CrowdfundingCampaignCreated')
     })
 
@@ -59,7 +60,8 @@ describe('CampaignFactory', () => {
         fees,
         description,
         nbTiers,
-        usdcAddr
+        usdcAddr,
+        objectif
       )).to.be.revertedWith('You\'re not the owner')
     })
   })
