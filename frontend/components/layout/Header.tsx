@@ -6,8 +6,8 @@ import AppLogo from '../AppLogo'
 
 const Header = () => {
     const links: string[][] = [
-        ['Search a Project', '/projects'],
-        ['Start a Project', '/projects/create-project'],
+        ['Search a Campaign', '/campaigns'],
+        ['Start a Campaign', '/campaigns/create-campaign'],
     ]
 
     return (
