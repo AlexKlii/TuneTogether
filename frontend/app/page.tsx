@@ -1,4 +1,6 @@
+import PageTitle from '@/components/layout/PageTitle'
+
 const Home = () => {
-  return (<h1 className='text-center text-4xl font-semibold pb-10'>Homepage</h1>)
+  return (<PageTitle>Homepage</PageTitle>)
 }
 export default Home

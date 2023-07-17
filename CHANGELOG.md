@@ -1,18 +1,30 @@
 # Changelog
 
-## 0.12.0 (2023-07-17)
+## 0.13.0 (2023-07-17)
 
-### feat: Implement first frontend components
+### feat: Implement `CreateCampaign` form page (frontend part)
 
-- Implement `Header` Component
-- Implement `AppLogo` Component
-- Implement `Projects` Page Component
-- Implement `CreateProject` Page Component
-- Update deployment scripts
+- Implement `PageTitle` Component
+- Change `CreateProject` name component to `CreateCampaign`
+- Change `Projects` name component to `Campaigns`
+- Implement `CreateCampaign` form page (frontend part)
+- Add `TierPrice` and `TierPriceReward` interfaces
 ---
 
 <details>
   <summary>See old changelog</summary>
+
+  ## 0.12.0 (2023-07-17)
+
+  ### feat: Implement first frontend components
+
+  - Implement `Header` Component
+  - Implement `AppLogo` Component
+  - Implement `Projects` Page Component
+  - Implement `CreateProject` Page Component
+  - Update deployment scripts
+  ---
+
 
   ## 0.11.0 (2023-07-15)
 
