@@ -1,16 +1,27 @@
 # Changelog
 
-## 0.11.0 (2023-07-15)
+## 0.12.0 (2023-07-17)
 
-### feat: Implement Campaign Objectif
+### feat: Implement first frontend components
 
-- Implement `objectif` in `CrowdfundingCampaign`
-- Update `_setArtist` method from `TuneTogether`
-- Update tests
+- Implement `Header` Component
+- Implement `AppLogo` Component
+- Implement `Projects` Page Component
+- Implement `CreateProject` Page Component
+- Update deployment scripts
 ---
 
 <details>
   <summary>See old changelog</summary>
+
+  ## 0.11.0 (2023-07-15)
+
+  ### feat: Implement Campaign Objectif
+
+  - Implement `objectif` in `CrowdfundingCampaign`
+  - Update `_setArtist` method from `TuneTogether`
+  - Update tests
+  ---
 
   ## 0.10.1 (2023-07-14)
 

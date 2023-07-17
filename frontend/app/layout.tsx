@@ -3,18 +3,16 @@
 import './globals.css'
 import '@rainbow-me/rainbowkit/styles.css'
 
-import { Providers } from './providers'
+import Providers from './providers'
+import Header from '@/components/layout/Header'
 
-function RootLayout({ children }: { children: React.ReactNode }) {
+const RootLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <html lang="en">
       <body className="bg-gray-900 text-slate-200">
         <Providers>
+          <Header />
           <main className='container mx-auto pt-10'>
-            <h1 className='text-center text-6xl hover:scale-110 hover:pl-2'>
-              Tune Together
-            </h1>
-
             {children}
           </main>
         </Providers>
@@ -22,5 +20,4 @@ function RootLayout({ children }: { children: React.ReactNode }) {
     </html>
   )
 }
-
 export default RootLayout
