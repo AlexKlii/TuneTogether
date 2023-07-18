@@ -242,16 +242,18 @@ const CreateCampaign = () => {
         eventName: 'CampaignAdded',
         listener(event: any) {
             if (typeof event[0]?.args != undefined) {
-                tierPrices.sort((a, b) => a.id - b.id).forEach(tierPrice => {
-                    const priceInWei = tierPrice.price * 10**6
-                    setCampaignAddr(event[0].args['_campaignAddr'])
+                setCampaignAddr(event[0].args['_campaignAddr'])
+                
+                const firstTierPrice = tierPrices.find(tierPrice => tierPrice.id === 1)
+                if (firstTierPrice) {
+                    const priceInWei = firstTierPrice.price * 10**6
                     
-                    // Set all tier prices
-                    writeForContractByFunctionName(event[0].args['_campaignAddr'], 'setTierPrice', (tierPrice.id).toString(), priceInWei.toString()).then(() => {
-                        console.log(`Tier ${tierPrice.id} added`)
+                    // Set first tier price
+                    writeForContractByFunctionName(event[0].args['_campaignAddr'], 'setTierPrice', (firstTierPrice.id).toString(), priceInWei.toString()).then(() => {
+                        console.log(`Tier ${firstTierPrice.id} added`)
                         toast({
                             title: 'Tier Price added',
-                            description: `Successfully added tier price ${tierPrice.id}`,
+                            description: `Successfully added tier price ${firstTierPrice.id}`,
                             status: 'success',
                             duration: 2000,
                             isClosable: true,
@@ -266,7 +268,7 @@ const CreateCampaign = () => {
                         })
                         setLoading(false)
                     })
-                })
+                }
             }            
         }
     })
@@ -277,27 +279,57 @@ const CreateCampaign = () => {
         eventName: 'TierPriceAdded',
         listener(event: any) {
             // Start campaign when all tier prices was filled
-            if (campaignAddr && event[0].args._id === tierPrices.length) {
-                writeForContractByFunctionName(campaignAddr, 'startCampaign').then(() => {
-                    console.log(`Campaign started at address ${campaignAddr}!`)
-                    toast({
-                        title: 'Congrats !',
-                        description: 'Campaign is now started',
-                        status: 'success',
-                        duration: 5000,
-                        isClosable: true,
-                    })
-                    push('/')
-                }).catch(err => {
-                    toast({
-                        title: 'Unable to start campaign',
-                        description: err.message,
-                        status: 'error',
-                        duration: 5000,
-                        isClosable: true,
-                    })
-                })
-                .finally(() => setLoading(false))
+            const tierPriceAddedId: number = event[0].args._id
+            if (campaignAddr) {
+                if (tierPriceAddedId === tierPrices.length) {
+                    writeForContractByFunctionName(campaignAddr, 'startCampaign').then(() => {
+                        console.log(`Campaign started at address ${campaignAddr}!`)
+                        toast({
+                            title: 'Congrats !',
+                            description: 'Campaign is now started',
+                            status: 'success',
+                            duration: 5000,
+                            isClosable: true,
+                        })
+                        push('/')
+                    }).catch(err => {
+                        toast({
+                            title: 'Unable to start campaign',
+                            description: err.message,
+                            status: 'error',
+                            duration: 5000,
+                            isClosable: true,
+                        })
+                    }).finally(() => setLoading(false))
+                } else {
+                    const nextId = tierPriceAddedId + 1
+                    const nextTierPrice = tierPrices.find(tierPrice => tierPrice.id === nextId)
+
+                    if (nextTierPrice) {
+                        const priceInWei = nextTierPrice.price * 10 ** 6
+
+                        // Set next tier price
+                        writeForContractByFunctionName(campaignAddr, 'setTierPrice', nextId.toString(), priceInWei.toString()).then(() => {
+                            console.log(`Tier ${nextId} added`)
+                            toast({
+                                title: 'Tier Price added',
+                                description: `Successfully added tier price ${nextId}`,
+                                status: 'success',
+                                duration: 2000,
+                                isClosable: true,
+                            })
+                        }).catch(err => {
+                            toast({
+                                title: 'Unable to add tier price',
+                                description: err.message,
+                                status: 'error',
+                                duration: 5000,
+                                isClosable: true,
+                            })
+                            setLoading(false)
+                        })
+                    }
+                }
             }
         }
     })
