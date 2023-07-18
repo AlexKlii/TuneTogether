@@ -571,7 +571,7 @@ describe('TuneTogether', () => {
       await expect(tuneTogether.connect(artist).setBoost(campaignAddr, {value: ethers.parseEther("0.001")})).to.emit(tuneTogether, 'CampaignBoosted')
     })
 
-    it('Should set boost in Crowfunding contract', async () => {
+    it('Should set boost in Crowdfunding contract', async () => {
       const { tuneTogether, artist, crowdfundingCampaign, campaignAddr } = await loadFixture(deployFixtureWithCampaign)
       await crowdfundingCampaign.connect(artist).startCampaign()
 

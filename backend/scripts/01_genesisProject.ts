@@ -92,7 +92,7 @@ async function main() {
   /* ****************************************************************** */
   const createCampaignTx = await tuneTogether.connect(artist).createNewCampaign(
     'GENESIS Campaign',
-    'The Gensis TuneTogether Crowfunding Campaign',
+    'The Gensis TuneTogether Crowdfunding Campaign',
     0,
     'TuneTogether',
     'TuneTogether Artist bio',

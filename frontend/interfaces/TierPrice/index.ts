@@ -1,7 +1,8 @@
-import { TierPriceReward } from "./TierPriceReward"
+import { TierPriceReward } from './TierPriceReward'
 
 export interface TierPrice {
-    img: File,
+    id: number
+    name: string
     price: number
     rewards: TierPriceReward[]
 }

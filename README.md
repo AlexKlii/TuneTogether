@@ -101,7 +101,7 @@ Some tasks was created to help you in testnet environement:
 * Approve Allowance
 
 ```shell
-npx hardhat approveAllowance --network NETWORK --usdc USDC_ADDR --amount AMOUNT_TO_ALLOW --from USER_ADDR --sender CROWFUNDING_CAMPAIGN_ADDR
+npx hardhat approveAllowance --network NETWORK --usdc USDC_ADDR --amount AMOUNT_TO_ALLOW --from USER_ADDR --sender CROWDFUNDING_CAMPAIGN_ADDR
 ```
 
 * Faucet USDC
