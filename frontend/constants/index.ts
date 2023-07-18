@@ -1,6 +1,7 @@
 export const contractAddress = `${process.env.NEXT_PUBLIC_CONTRACT_ADDRESS}` as `0x${string}`
 export const genesisBlock = `${process.env.NEXT_PUBLIC_GENESIS_BLOCK}`
 export const network = `${process.env.NEXT_PUBLIC_NETWORK}`
+export const JWT = `Bearer ${process.env.NEXT_PUBLIC_PINATA_JWT}`
 
 
 /*************************************************************/
@@ -293,7 +294,7 @@ export const tuneTogetherAbi = [
         "type": "function"
     }
 ]
-export const cowdfundingCampaignAbi = [
+export const crowdfundingCampaignAbi = [
     {
         "inputs": [
             {

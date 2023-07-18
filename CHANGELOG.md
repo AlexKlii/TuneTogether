@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.13.1 (2023-07-18)
+
+### feat: Implement `CreateCampaign` form page (backend part)
+
+- Implement `IsConnected` Component
+- Implement `Loader` Component
+- Implement `utils` file
+- Add `.env` constant
+- Update `CreateCampaign` with backend implementation
+
 ## 0.13.0 (2023-07-17)
 
 ### feat: Implement `CreateCampaign` form page (frontend part)

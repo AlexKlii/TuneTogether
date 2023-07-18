@@ -3,12 +3,10 @@ import { Link } from '@chakra-ui/react'
 
 import NextLink from 'next/link'
 import AppLogo from '../AppLogo'
+import { useAccount } from 'wagmi'
 
 const Header = () => {
-    const links: string[][] = [
-        ['Search a Campaign', '/campaigns'],
-        ['Start a Campaign', '/campaigns/create-campaign'],
-    ]
+    const { isConnected } = useAccount()
 
     return (
         <header className='bg-gray-950 text-gray-100 border-gray-500 border-b'>
@@ -17,21 +15,24 @@ const Header = () => {
                     <AppLogo textSize='text-xl' pbSize='pb-0'/>
                 </div>
 
-                <div className='w-4/6 flex justify-start'>
-                    {links.map(([title, url], i) => (
-                        <Link key={i} as={NextLink} href={url} className="rounded-lg px-5 py-2 font-medium hover:bg-gray-800 hover:text-slate-300" style={{ textDecoration: 'none' }}>
-                            {title}
+                {/* <div className='w-3/6 flex justify-start'> */}
+                <div className={`flex justify-start ${isConnected ? 'w-3/6' : 'w-4/6'}`}>
+                    <Link as={NextLink} href='/campaigns' className='rounded-lg px-5 py-2 font-medium hover:bg-gray-800 hover:text-slate-300' style={{ textDecoration: 'none' }}>
+                        Search a Campaign
+                    </Link>
+
+                    {isConnected &&
+                        <Link as={NextLink} href='/campaigns/create-campaign' className='rounded-lg px-5 py-2 font-medium hover:bg-gray-800 hover:text-slate-300' style={{ textDecoration: 'none' }}>
+                            Start a Campaign
                         </Link>
-                    ))}
+                    }
                 </div>
 
-                
-
-                <div className='w-1/6'>
+                <div className={isConnected ? 'w-2/6' : 'w-1/6'}>
                     <ConnectButton />
                 </div>
             </nav>
         </header>
     )
 }
-export default Header;
+export default Header
