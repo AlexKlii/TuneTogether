@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation'
 import { getArtist, pinFilesToIPFS, uploadFromBuffer, writeContractByFunctionName, writeForContractByFunctionName } from '@/utils'
 import { TierPriceReward } from '@/interfaces/TierPrice/TierPriceReward'
 import { TierPrice } from '@/interfaces/TierPrice'
-import { contractAddress, tuneTogetherAbi } from '@/constants'
+import { contractAddress, crowdfundingCampaignAbi, tuneTogetherAbi } from '@/constants'
 import PageTitle from '@/components/layout/PageTitle'
 import IsConnected from '@/components/IsConnected'
 
@@ -39,6 +39,7 @@ const CreateCampaign = () => {
     const [wrongFileExtension, setWrongFileExtension] = useState(false)
     const [wrongFileName, setWrongFileName] = useState(false)
     const [artist, setArtist] = useState<Artist>()
+    const [campaignAddr, setCampaignAddr] = useState<`0x${string}`>()
 
     const { push } = useRouter()
     const toast = useToast()
@@ -243,6 +244,7 @@ const CreateCampaign = () => {
             if (typeof event[0]?.args != undefined) {
                 tierPrices.sort((a, b) => a.id - b.id).forEach(tierPrice => {
                     const priceInWei = tierPrice.price * 10**6
+                    setCampaignAddr(event[0].args['_campaignAddr'])
                     
                     // Set all tier prices
                     writeForContractByFunctionName(event[0].args['_campaignAddr'], 'setTierPrice', (tierPrice.id).toString(), priceInWei.toString()).then(() => {
@@ -254,30 +256,6 @@ const CreateCampaign = () => {
                             duration: 2000,
                             isClosable: true,
                         })
-
-                        // Start campaign when all tier prices was filled
-                        if (tierPrice.id === tierPrices.length) {
-                            writeForContractByFunctionName(event[0].args['_campaignAddr'], 'startCampaign').then(() => {
-                                console.log(`Campaign started at address ${event[0].args['_campaignAddr']}!`)
-                                toast({
-                                    title: 'Congrats !',
-                                    description: 'Campaign is now started',
-                                    status: 'success',
-                                    duration: 5000,
-                                    isClosable: true,
-                                })
-                                push('/')
-                            }).catch(err => {
-                                toast({
-                                    title: 'Unable to start campaign',
-                                    description: err.message,
-                                    status: 'error',
-                                    duration: 5000,
-                                    isClosable: true,
-                                })
-                            })
-                            .finally(() => setLoading(false))
-                        }
                     }).catch(err => {
                         toast({
                             title: 'Unable to add tier price',
@@ -290,6 +268,37 @@ const CreateCampaign = () => {
                     })
                 })
             }            
+        }
+    })
+
+    useContractEvent({
+        address: campaignAddr,
+        abi: crowdfundingCampaignAbi,
+        eventName: 'TierPriceAdded',
+        listener(event: any) {
+            // Start campaign when all tier prices was filled
+            if (campaignAddr && event[0].args._id === tierPrices.length) {
+                writeForContractByFunctionName(campaignAddr, 'startCampaign').then(() => {
+                    console.log(`Campaign started at address ${campaignAddr}!`)
+                    toast({
+                        title: 'Congrats !',
+                        description: 'Campaign is now started',
+                        status: 'success',
+                        duration: 5000,
+                        isClosable: true,
+                    })
+                    push('/')
+                }).catch(err => {
+                    toast({
+                        title: 'Unable to start campaign',
+                        description: err.message,
+                        status: 'error',
+                        duration: 5000,
+                        isClosable: true,
+                    })
+                })
+                .finally(() => setLoading(false))
+            }
         }
     })
 
