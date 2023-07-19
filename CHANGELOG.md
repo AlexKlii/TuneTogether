@@ -1,6 +1,12 @@
 # Changelog
 
+## 0.16.2 (2023-07-19)
+
+### fix: Fix error on second mint in `Campaign` page component
+---
+
 ## 0.16.1 (2023-07-19)
+
 ### fix: Fix loading in `CreateCampaign` page component
 ---
 

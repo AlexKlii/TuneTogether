@@ -72,6 +72,7 @@ const Campaign = ({ params }: { params: { campaignAddr: `0x${string}` } }) => {
         if (0 !== mintId && logOwner === address) {
             const id = mintId.toString()
             setMintId(0)
+            setLogOwner(undefined)
 
             // Mint NFT after allowance approval
             writeForContractByFunctionName(campaignAddr, 'mint', id, '1').catch(err => {
@@ -98,7 +99,9 @@ const Campaign = ({ params }: { params: { campaignAddr: `0x${string}` } }) => {
             })
 
             setLoading(false)
+            setMintId(0)
             setLogMint(undefined)
+            setLogOwner(undefined)
         }
     }, [address, logMint, toast])
 
