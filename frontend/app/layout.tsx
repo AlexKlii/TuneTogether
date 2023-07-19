@@ -8,8 +8,8 @@ import Header from '@/components/layout/Header'
 
 const RootLayout = ({ children }: { children: React.ReactNode }) => {
   return (
-    <html lang="en">
-      <body className="bg-gray-900 text-slate-200">
+    <html lang='en'>
+      <body className='bg-gray-900 text-slate-200'>
         <Providers>
           <Header />
           <main className='container mx-auto pt-10'>

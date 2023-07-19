@@ -12,4 +12,5 @@ export interface CampaignWithArtist extends Campaign {
     artistName: string
     artistBio: string
     artistCampaigns: `0x${string}`[]
+    campaignAddr: `0x${string}`
 }

@@ -110,4 +110,4 @@ npx hardhat approveAllowance --network NETWORK --usdc USDC_ADDR --amount AMOUNT_
 npx hardhat faucet --network NETWORK --usdc USDC_ADDR --amount AMOUNT_TO_SEND --recipient USER_ADDR
 ```
 
-Open [localhost:3000](http://localhost:3000) on you're browser to see the result.
+Open [localhost:3000](http://localhost:3000) on your browser to see the result.

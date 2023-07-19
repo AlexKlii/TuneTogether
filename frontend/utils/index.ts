@@ -1,7 +1,7 @@
 import axios from 'axios'
-import { BaseError, ContractFunctionRevertedError, GetLogsReturnType, createPublicClient, http, parseAbiItem } from 'viem'
+import { BaseError, ContractFunctionRevertedError, createPublicClient, http, parseAbiItem } from 'viem'
 import { prepareWriteContract, writeContract, readContract } from '@wagmi/core'
-import { contractAddress, crowdfundingCampaignAbi, tuneTogetherAbi, JWT, network, genesisBlock, CampaignAdded } from '@/constants'
+import { contractAddress, crowdfundingCampaignAbi, tuneTogetherAbi, JWT, network, genesisBlock, CampaignAdded, usdcAbi, uscdContractAddress } from '@/constants'
 import { Artist } from '@/interfaces/Artist'
 import { hardhat, sepolia, polygonMumbai } from 'viem/chains'
 import { Campaign, CampaignWithArtist } from '@/interfaces/Campaign'
@@ -105,16 +105,22 @@ export const readContractByFunctionName = async <T>(functionName: string, addres
     }
 }
 
+export const campaignEndTimestamp = async (campaignAddr: `0x${string}`, userAddr: `0x${string}`): Promise<number|null> => {
+    return readForContractByFunctionName<number>(campaignAddr, 'endTimestamp', userAddr).then(
+        timestamp => Number(timestamp) * 1000
+    ).catch(() => null)
+}
+
 export const userIsCampaignArtist = async (campaignAddr: `0x${string}`, userAddr: `0x${string}`): Promise<boolean> => {
     return readForContractByFunctionName<`0x${string}`>(campaignAddr, 'artistAddress', userAddr).then(
         hash => hash === userAddr
     ).catch(() => false)
 }
 
-export const writeForContractByFunctionName = async (addr: `0x${string}` ,functionName: string, ...args: `0x${string}`[]|string[]): Promise<`0x${string}`> => { 
+export const writeForContractByFunctionName = async (contractAddr: `0x${string}`, functionName: string, ...args: `0x${string}`[]|string[]): Promise<`0x${string}`> => { 
     try {
         const { request } = await prepareWriteContract({
-            address: addr,
+            address: contractAddr,
             abi: crowdfundingCampaignAbi,
             functionName: functionName,
             args: args
@@ -171,7 +177,8 @@ export const getCampaignWithArtist = async (userAddress: `0x${string}`, campaign
                 artist: campaign.artist,
                 artistBio: artist.bio,
                 artistCampaigns: artist.campaigns,
-                artistName: artist.name
+                artistName: artist.name,
+                campaignAddr
             }
 
             return campaignWithArtist
@@ -179,6 +186,23 @@ export const getCampaignWithArtist = async (userAddress: `0x${string}`, campaign
     )
 }
 
+export const approveAllowance = async (userAddress: `0x${string}`, ...args: unknown[]): Promise<`0x${string}`> => {
+    try {
+        const { request } = await prepareWriteContract({
+            address: uscdContractAddress,
+            abi: usdcAbi,
+            functionName: 'approve',
+            account: userAddress,
+            args: args
+        })
+
+        const { hash } = await writeContract(request)
+        
+        return hash
+    } catch (err) {
+        throw formattedError(err)
+    }
+}
 
 const formattedError = (err: any): Error => {
     if (err instanceof BaseError) {

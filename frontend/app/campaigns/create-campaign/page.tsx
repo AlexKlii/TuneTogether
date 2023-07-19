@@ -282,17 +282,9 @@ const CreateCampaign = () => {
             const tierPriceAddedId: number = event[0].args._id
             if (campaignAddr) {
                 if (tierPriceAddedId === tierPrices.length) {
-                    writeForContractByFunctionName(campaignAddr, 'startCampaign').then(() => {
-                        console.log(`Campaign started at address ${campaignAddr}!`)
-                        toast({
-                            title: 'Congrats !',
-                            description: 'Campaign is now started',
-                            status: 'success',
-                            duration: 5000,
-                            isClosable: true,
-                        })
-                        push(`/campaigns/${campaignAddr}`)
-                    }).catch(err => {
+                    writeForContractByFunctionName(campaignAddr, 'startCampaign').then(
+                        () => console.log(`Campaign started at address ${campaignAddr}!`)
+                    ).catch(err => {
                         toast({
                             title: 'Unable to start campaign',
                             description: err.message,
@@ -334,6 +326,22 @@ const CreateCampaign = () => {
         }
     })
 
+    useContractEvent({
+        address: campaignAddr,
+        abi: crowdfundingCampaignAbi,
+        eventName: 'CampaignStarted',
+        listener() {
+            toast({
+                title: 'Congrats !',
+                description: 'Campaign is now started',
+                status: 'success',
+                duration: 5000,
+                isClosable: true,
+            })
+            push(`/campaigns/${campaignAddr}`)
+        }
+    })
+
     useEffect(() => {
         const debounced = debounce(() => {
             setUpdateTierPrice(false)
@@ -353,7 +361,7 @@ const CreateCampaign = () => {
     }, [isConnected, address, loading])
 
     return (
-        <Loader isLoading={loading}>
+        <Loader isLoading={loading} message={'Campaign creation in progress... Please wait a moment'}>
             <IsConnected>
                 {!artist || (artist && artist.campaigns.length < 10) ?
                     <section>
