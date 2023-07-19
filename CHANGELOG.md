@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.13.2 (2023-07-19)
+
+### fix: Update `CreateCampaign` to avoid issue with images name
+
+- Update upload of image file (now upload file by file)
+- Update file name by `tierPrice.id` before upload to pinata
+- Update `TierPrice` interface
+
 ## 0.13.1 (2023-07-18)
 
 ### feat: Implement `CreateCampaign` form page (backend part)

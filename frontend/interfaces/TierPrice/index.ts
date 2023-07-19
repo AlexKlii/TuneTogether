@@ -5,4 +5,6 @@ export interface TierPrice {
     name: string
     price: number
     rewards: TierPriceReward[]
+    img: File
+    extensionError?: boolean
 }
