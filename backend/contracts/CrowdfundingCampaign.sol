@@ -93,7 +93,7 @@ contract CrowdfundingCampaign is ERC1155, ERC1155Supply {
     /// @param _id The ID of the token to mint.
     /// @param _amount The amount of tokens to mint.
     function mint(uint8 _id, uint256 _amount) public campaignInProgress {
-        require(_usdc.balanceOf(msg.sender) >= _amount * tierPrices[_id], "Not enough balance");
+        require(_usdc.balanceOf(msg.sender) >= _amount * tierPrices[_id], 'Not enough balance');
 
         _usdc.transferFrom(msg.sender, address(this), _amount * tierPrices[_id]);
         _mint(msg.sender, _id, _amount, '');
@@ -180,7 +180,7 @@ contract CrowdfundingCampaign is ERC1155, ERC1155Supply {
         _usdc.transfer(msg.sender, usdcBalance);
         
         (bool success, ) = msg.sender.call{value: ethBalance}('');
-        require(success, "Withdraw failed");
+        require(success, 'Withdraw failed');
 
         emit FundWithdraw(msg.sender, usdcBalance, ethBalance, block.timestamp);
     }

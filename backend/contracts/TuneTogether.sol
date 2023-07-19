@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
 
+import '../node_modules/@openzeppelin/contracts/access/Ownable.sol';
 import './CampaignFactory.sol';
 import './CrowdfundingCampaign.sol';
 
 /// @title TuneTogether Contract
 /// @dev A contract for managing campaigns and artists.
-contract TuneTogether {
+contract TuneTogether is Ownable {
     CampaignFactory private _campaignFactory;
     CrowdfundingCampaign private _crowdfundingCampaign;
 
@@ -36,6 +37,7 @@ contract TuneTogether {
     event CampaignAdded(address _artistAddr, address _campaignAddr);
     event CampaignUpdated(address _campaignAddr);
     event CampaignBoosted(address _contractAddr, uint _timestamp);
+    event FundWithdraw(uint _balance, uint _timestamp);
 
     /// @dev Initializes the TuneTogether contract.
     /// @param _campaignFactoryAddress The address of the CampaignFactory contract.
@@ -159,6 +161,15 @@ contract TuneTogether {
             artistCampaigns[artist.campaigns.length] = _campaignAddr;
             artist.campaigns = artistCampaigns;
         }
+    }
+
+    /// @dev Withdraws funds from boost.
+    function withdraw() external onlyOwner {
+        uint ethBalance = address(this).balance;
+        (bool success, ) = msg.sender.call{value: ethBalance}('');
+        require(success, 'Withdraw failed');
+
+        emit FundWithdraw(ethBalance, block.timestamp);
     }
 
     /// @dev Sets the information for a campaign.
