@@ -15,7 +15,6 @@ const Header = () => {
                     <AppLogo textSize='text-xl' pbSize='pb-0'/>
                 </div>
 
-                {/* <div className='w-3/6 flex justify-start'> */}
                 <div className={`flex justify-start ${isConnected ? 'w-3/6' : 'w-4/6'}`}>
                     <Link as={NextLink} href='/campaigns' className='rounded-lg px-5 py-2 font-medium hover:bg-gray-800 hover:text-slate-300' style={{ textDecoration: 'none' }}>
                         Search a Campaign
