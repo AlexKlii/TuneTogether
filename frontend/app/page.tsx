@@ -1,6 +1,11 @@
+import IsConnected from '@/components/IsConnected'
 import PageTitle from '@/components/layout/PageTitle'
 
 const Home = () => {
-  return (<PageTitle>Homepage</PageTitle>)
+  return (
+    <IsConnected>
+      <PageTitle>Homepage</PageTitle>
+    </IsConnected>
+  )
 }
 export default Home

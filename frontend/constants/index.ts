@@ -3,6 +3,8 @@ export const genesisBlock = `${process.env.NEXT_PUBLIC_GENESIS_BLOCK}`
 export const network = `${process.env.NEXT_PUBLIC_NETWORK}`
 export const JWT = `Bearer ${process.env.NEXT_PUBLIC_PINATA_JWT}`
 
+export const CampaignAdded = 'event CampaignAdded(address _artistAddr, address _campaignAddr)'
+
 
 /*************************************************************/
 /*****************       Contracts ABI       *****************/
