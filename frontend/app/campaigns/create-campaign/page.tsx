@@ -157,16 +157,18 @@ const CreateCampaign = () => {
                 break
             }
 
-            var file = tierPrice.img
-            var blob = file.slice(0, file.size, 'image/png');
-            
-            // Change img name
-            tierPrice.img = new File([blob], `img/${tierPrice.id}.png`, {type: 'image/png'})
-            files.push(tierPrice.img)
+            if ('' !== tierPrice.img.name) {
+                var file = tierPrice.img
+                var blob = file.slice(0, file.size, 'image/png');
+                
+                // Change img name
+                tierPrice.img = new File([blob], `img/${tierPrice.id}.png`, {type: 'image/png'})
+                files.push(tierPrice.img)
+            }
         }
 
         if (!hasError && !wrongTierPricesInfo && !wrongFileExtension) {
-            if (files) {
+            if (files.length > 0) {
                 // Upload img folder from FormData to pinata
                 pinFilesToIPFS(files, name).then(result => {
                     const blobs: Blob[] = []
@@ -289,7 +291,7 @@ const CreateCampaign = () => {
                             duration: 5000,
                             isClosable: true,
                         })
-                        push('/')
+                        push(`/campaigns/${campaignAddr}`)
                     }).catch(err => {
                         toast({
                             title: 'Unable to start campaign',

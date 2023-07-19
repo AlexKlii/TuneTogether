@@ -1,8 +1,23 @@
 import axios from 'axios'
-import { BaseError, ContractFunctionRevertedError } from 'viem'
+import { BaseError, ContractFunctionRevertedError, GetLogsReturnType, createPublicClient, http, parseAbiItem } from 'viem'
 import { prepareWriteContract, writeContract, readContract } from '@wagmi/core'
-import { contractAddress, crowdfundingCampaignAbi, tuneTogetherAbi, JWT } from '@/constants'
+import { contractAddress, crowdfundingCampaignAbi, tuneTogetherAbi, JWT, network, genesisBlock, CampaignAdded } from '@/constants'
 import { Artist } from '@/interfaces/Artist'
+import { hardhat, sepolia, polygonMumbai } from 'viem/chains'
+import { Campaign, CampaignWithArtist } from '@/interfaces/Campaign'
+
+const usedNetwork = () => {
+    switch (network) {
+        case 'sepolia': return sepolia
+        case 'hardhat': return hardhat
+        case 'mumbai': return polygonMumbai
+    }
+}
+
+export const client = createPublicClient({
+    chain: usedNetwork(),
+    transport: http()
+})
 
 export const pinFilesToIPFS = async (selectedFiles: File[] | FileList, name: string): Promise<{ IpfsHash: string, PinSize: number, Timestamp: string, isDuplicate?: boolean }> => {
     const formData = new FormData()
@@ -129,6 +144,41 @@ export const readForContractByFunctionName = async <T>(contractAddr: `0x${string
         throw formattedError(err)
     }
 }
+
+export const getCampaignAddedEvents = async (): Promise<any> => {
+    try {
+        return await client.getLogs({
+            address: contractAddress,
+            event: parseAbiItem(CampaignAdded),
+            fromBlock: BigInt(genesisBlock),
+            toBlock: 'latest'
+        })
+    } catch (err) {
+        throw formattedError(err)
+    }
+}
+
+export const getCampaignWithArtist = async (userAddress: `0x${string}`, campaignAddr: `0x${string}`): Promise<CampaignWithArtist> => {
+    return readContractByFunctionName<Campaign>('getOneCampaign', userAddress, campaignAddr).then(
+        async campaign => readContractByFunctionName<Artist>('getArtist', userAddress, campaign.artist).then(artist => {
+            const campaignWithArtist: CampaignWithArtist = {
+                name: campaign.name,
+                description: campaign.description,
+                boost: Number(campaign.boost),
+                fees: Number(campaign.fees),
+                objectif: Number(campaign.objectif) / 10**6, // Remove USDC decimals
+                nbTiers: Number(campaign.nbTiers),
+                artist: campaign.artist,
+                artistBio: artist.bio,
+                artistCampaigns: artist.campaigns,
+                artistName: artist.name
+            }
+
+            return campaignWithArtist
+        })
+    )
+}
+
 
 const formattedError = (err: any): Error => {
     if (err instanceof BaseError) {

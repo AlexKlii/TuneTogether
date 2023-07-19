@@ -1,36 +1,52 @@
 # Changelog
 
-## 0.13.2 (2023-07-19)
+## 0.14.0 (2023-07-19)
 
-### fix: Update `CreateCampaign` to avoid issue with images name
+### feat: Implement `Campaigns` page component
 
-- Update upload of image file (now upload file by file)
-- Update file name by `tierPrice.id` before upload to pinata
-- Update `TierPrice` interface
-
-## 0.13.1 (2023-07-18)
-
-### feat: Implement `CreateCampaign` form page (backend part)
-
-- Implement `IsConnected` Component
-- Implement `Loader` Component
-- Implement `utils` file
-- Add `.env` constant
-- Update `CreateCampaign` with backend implementation
-
-## 0.13.0 (2023-07-17)
-
-### feat: Implement `CreateCampaign` form page (frontend part)
-
-- Implement `PageTitle` Component
-- Change `CreateProject` name component to `CreateCampaign`
-- Change `Projects` name component to `Campaigns`
-- Implement `CreateCampaign` form page (frontend part)
-- Add `TierPrice` and `TierPriceReward` interfaces
+- List all campaigns in `Campaigns` page
+- Fix `CreateCampaign` when no img for a `tierPrice`
+- Implement `Campaign` page component
+- Change redirect in `CreateCampaign` when campaign created to `Campaign` page
+- Update `Home` page component
+- Fix `AppLogo` minor issue
+- Update `Header` component
+- Add `Campaign` and `CampaignWithArtist` interfaces
 ---
 
 <details>
   <summary>See old changelog</summary>
+
+  ## 0.13.2 (2023-07-19)
+
+  ### fix: Update `CreateCampaign` to avoid issue with images name
+
+  - Update upload of image file (now upload file by file)
+  - Update file name by `tierPrice.id` before upload to pinata
+  - Update `TierPrice` interface
+  ---
+
+  ## 0.13.1 (2023-07-18)
+
+  ### feat: Implement `CreateCampaign` form page (backend part)
+
+  - Implement `IsConnected` Component
+  - Implement `Loader` Component
+  - Implement `utils` file
+  - Add `.env` constant
+  - Update `CreateCampaign` with backend implementation
+  ---
+
+  ## 0.13.0 (2023-07-17)
+
+  ### feat: Implement `CreateCampaign` form page (frontend part)
+
+  - Implement `PageTitle` Component
+  - Change `CreateProject` name component to `CreateCampaign`
+  - Change `Projects` name component to `Campaigns`
+  - Implement `CreateCampaign` form page (frontend part)
+  - Add `TierPrice` and `TierPriceReward` interfaces
+  ---
 
   ## 0.12.0 (2023-07-17)
 
