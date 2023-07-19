@@ -568,34 +568,34 @@ describe('TuneTogether', () => {
       const { tuneTogether, artist, crowdfundingCampaign, campaignAddr } = await loadFixture(deployFixtureWithCampaign)
       await crowdfundingCampaign.connect(artist).startCampaign()
 
-      await expect(tuneTogether.connect(artist).setBoost(campaignAddr, {value: ethers.parseEther("0.001")})).to.emit(tuneTogether, 'CampaignBoosted')
+      await expect(tuneTogether.connect(artist).setBoost(campaignAddr, {value: ethers.parseEther('0.001')})).to.emit(tuneTogether, 'CampaignBoosted')
     })
 
     it('Should set boost in Crowdfunding contract', async () => {
       const { tuneTogether, artist, crowdfundingCampaign, campaignAddr } = await loadFixture(deployFixtureWithCampaign)
       await crowdfundingCampaign.connect(artist).startCampaign()
 
-      await expect(tuneTogether.connect(artist).setBoost(campaignAddr, {value: ethers.parseEther("0.001")})).to.emit(crowdfundingCampaign, 'Boosted')
+      await expect(tuneTogether.connect(artist).setBoost(campaignAddr, {value: ethers.parseEther('0.001')})).to.emit(crowdfundingCampaign, 'Boosted')
     })
 
     it('Revert if not the campaign artist', async () => {
       const { tuneTogether, owner, crowdfundingCampaign, artist, campaignAddr } = await loadFixture(deployFixtureWithCampaign)
       await crowdfundingCampaign.connect(artist).startCampaign()
 
-      await expect(tuneTogether.connect(owner).setBoost(campaignAddr, {value: ethers.parseEther("0.001")})).to.be.revertedWith('You\'re not the campaign artist')
+      await expect(tuneTogether.connect(owner).setBoost(campaignAddr, {value: ethers.parseEther('0.001')})).to.be.revertedWith('You\'re not the campaign artist')
     })
 
     it('Revert if wrong value', async () => {
       const { tuneTogether, crowdfundingCampaign, artist, campaignAddr } = await loadFixture(deployFixtureWithCampaign)
       await crowdfundingCampaign.connect(artist).startCampaign()
 
-      await expect(tuneTogether.connect(artist).setBoost(campaignAddr, {value: ethers.parseEther("0.002")})).to.be.revertedWith('Wrong value')
+      await expect(tuneTogether.connect(artist).setBoost(campaignAddr, {value: ethers.parseEther('0.002')})).to.be.revertedWith('Wrong value')
     })
 
     it('Revert if Artist didn\'t start the campaign yet', async () => {
       const { tuneTogether, artist, campaignAddr } = await loadFixture(deployFixtureWithCampaign)
 
-      await expect(tuneTogether.connect(artist).setBoost(campaignAddr, {value: ethers.parseEther("0.001")})).to.be.revertedWith('Artist didn\'t start the campaign yet')
+      await expect(tuneTogether.connect(artist).setBoost(campaignAddr, {value: ethers.parseEther('0.001')})).to.be.revertedWith('Artist didn\'t start the campaign yet')
     })
 
     it('Revert if campaign closed', async () => {
@@ -603,7 +603,7 @@ describe('TuneTogether', () => {
       await crowdfundingCampaign.connect(artist).startCampaign()
       await crowdfundingCampaign.connect(artist).closeCampaign()
 
-      await expect(tuneTogether.connect(artist).setBoost(campaignAddr, {value: ethers.parseEther("0.001")})).to.be.revertedWith('Campaign closed')
+      await expect(tuneTogether.connect(artist).setBoost(campaignAddr, {value: ethers.parseEther('0.001')})).to.be.revertedWith('Campaign closed')
     })
 
     it('Revert if campaign ended', async () => {
@@ -611,7 +611,25 @@ describe('TuneTogether', () => {
       await crowdfundingCampaign.connect(artist).startCampaign()
       await time.increase(4838420); // Advance time by 8 weeks and mine a new block
 
-      await expect(tuneTogether.connect(artist).setBoost(campaignAddr, {value: ethers.parseEther("0.001")})).to.be.revertedWith('Campaign ended')
+      await expect(tuneTogether.connect(artist).setBoost(campaignAddr, {value: ethers.parseEther('0.001')})).to.be.revertedWith('Campaign ended')
+    })
+  })
+
+  describe('Withdraw', () => {
+    it('Should withdraw fund', async () => {
+      const { tuneTogether, artist, crowdfundingCampaign, campaignAddr, owner } = await loadFixture(deployFixtureWithCampaign)
+      await crowdfundingCampaign.connect(artist).startCampaign()
+      await tuneTogether.connect(artist).setBoost(campaignAddr, {value: ethers.parseEther('0.001')})
+
+      await expect(tuneTogether.connect(owner).withdraw()).to.emit(tuneTogether, 'FundWithdraw')
+    })
+
+    it('Revert if not the owner', async () => {
+      const { tuneTogether, artist, crowdfundingCampaign, campaignAddr, owner } = await loadFixture(deployFixtureWithCampaign)
+      await crowdfundingCampaign.connect(artist).startCampaign()
+      await tuneTogether.connect(artist).setBoost(campaignAddr, {value: ethers.parseEther('0.001')})
+
+      await expect(tuneTogether.connect(artist).withdraw()).to.be.revertedWith('Ownable: caller is not the owner')
     })
   })
 })

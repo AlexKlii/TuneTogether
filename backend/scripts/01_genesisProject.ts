@@ -40,7 +40,7 @@ async function main() {
   const tuneTogether: TuneTogether = await TuneTogether.connect(owner).deploy(campaignFactoryAddress, usdcAddr)
 
   await tuneTogether.waitForDeployment()
-  const latestBlock = await ethers.provider.getBlock("latest")
+  const latestBlock = await ethers.provider.getBlock('latest')
   const tuneTogetherAddress = await tuneTogether.getAddress()
   
   const setOwnerTx = await campaignFactory.connect(owner).setOwnerContractAddr(tuneTogetherAddress)

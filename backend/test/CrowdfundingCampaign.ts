@@ -196,12 +196,12 @@ describe('CrowdfundingCampaign', () => {
       await expect(crowdfundingCampaign.connect(investor).mint(1, 4)).to.emit(crowdfundingCampaign, 'TransferSingle')
     })
 
-    it("Revert if campaign not start", async () => {
+    it('Revert if campaign not start', async () => {
       const { crowdfundingCampaign, investor } = await loadFixture(deployFixture)
       await expect(crowdfundingCampaign.connect(investor).mint(2, 4)).to.be.revertedWith('Artist didn\'t start the campaign yet');
     })
 
-    it("Revert if campaign closed", async () => {
+    it('Revert if campaign closed', async () => {
       const { crowdfundingCampaign, artist, investor } = await loadFixture(deployFixtureWithCampaign)
       await crowdfundingCampaign.connect(artist).closeCampaign()
       await expect(crowdfundingCampaign.connect(investor).mint(3, 4)).to.be.revertedWith('Campaign closed');
@@ -212,7 +212,7 @@ describe('CrowdfundingCampaign', () => {
       await expect(crowdfundingCampaign.connect(investor).mint(4, 5)).to.be.revertedWith('Not enough balance')
     })
 
-    it("Revert if campaign ended", async () => {
+    it('Revert if campaign ended', async () => {
       const { crowdfundingCampaign, investor } = await loadFixture(deployFixtureWithCampaign)
       await time.increase(4838420);
 

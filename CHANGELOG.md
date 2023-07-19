@@ -1,21 +1,28 @@
 # Changelog
 
-## 0.14.0 (2023-07-19)
+## 0.15.0 (2023-07-19)
 
-### feat: Implement `Campaigns` page component
+### feat: Implement `withdraw` function in `TuneTogether`
 
-- List all campaigns in `Campaigns` page
-- Fix `CreateCampaign` when no img for a `tierPrice`
-- Implement `Campaign` page component
-- Change redirect in `CreateCampaign` when campaign created to `Campaign` page
-- Update `Home` page component
-- Fix `AppLogo` minor issue
-- Update `Header` component
-- Add `Campaign` and `CampaignWithArtist` interfaces
+- Add a `withdraw` function in `TuneTogether` to withdraw th boost fund
 ---
 
 <details>
   <summary>See old changelog</summary>
+
+  ## 0.14.0 (2023-07-19)
+
+  ### feat: Implement `Campaigns` page component
+
+  - List all campaigns in `Campaigns` page
+  - Fix `CreateCampaign` when no img for a `tierPrice`
+  - Implement `Campaign` page component
+  - Change redirect in `CreateCampaign` when campaign created to `Campaign` page
+  - Update `Home` page component
+  - Fix `AppLogo` minor issue
+  - Update `Header` component
+  - Add `Campaign` and `CampaignWithArtist` interfaces
+  ---
 
   ## 0.13.2 (2023-07-19)
 
