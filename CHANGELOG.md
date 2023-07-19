@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.16.1 (2023-07-19)
+### fix: Fix loading in `CreateCampaign` page component
+---
+
 ## 0.16.0 (2023-07-19)
 
 ### feat: Implement `Campaign` page component

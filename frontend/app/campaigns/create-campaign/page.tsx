@@ -285,6 +285,7 @@ const CreateCampaign = () => {
                     writeForContractByFunctionName(campaignAddr, 'startCampaign').then(
                         () => console.log(`Campaign started at address ${campaignAddr}!`)
                     ).catch(err => {
+                        setLoading(false)
                         toast({
                             title: 'Unable to start campaign',
                             description: err.message,
@@ -292,7 +293,7 @@ const CreateCampaign = () => {
                             duration: 5000,
                             isClosable: true,
                         })
-                    }).finally(() => setLoading(false))
+                    })
                 } else {
                     const nextId = tierPriceAddedId + 1
                     const nextTierPrice = tierPrices.find(tierPrice => tierPrice.id === nextId)
@@ -339,6 +340,7 @@ const CreateCampaign = () => {
                 isClosable: true,
             })
             push(`/campaigns/${campaignAddr}`)
+            setLoading(false)
         }
     })
 
