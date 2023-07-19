@@ -10,7 +10,6 @@ import '../node_modules/@openzeppelin/contracts/token/ERC20/IERC20.sol';
 /// @dev A contract for managing crowdfunding campaigns and token minting.
 contract CrowdfundingCampaign is ERC1155, ERC1155Supply {
     string  private _baseUri;
-    uint256 private _endTimestamp;
     bool    private _campaignStarted;
     bool    private _campaignInProgress;
     uint8   private _nbFilledTiers;
@@ -24,6 +23,7 @@ contract CrowdfundingCampaign is ERC1155, ERC1155Supply {
     uint8   public nbTiers;
     uint    public boost;
     uint    public objectif;
+    uint256 public endTimestamp;
 
     mapping(uint8 => uint) private tierPrices;
 
@@ -56,14 +56,14 @@ contract CrowdfundingCampaign is ERC1155, ERC1155Supply {
     modifier campaignInProgress() {
         require(_campaignStarted, 'Artist didn\'t start the campaign yet');
         require(_campaignInProgress, 'Campaign closed');
-        require(_endTimestamp > block.timestamp, 'Campaign ended');
+        require(endTimestamp > block.timestamp, 'Campaign ended');
         _;
     }
 
     /// @dev Throws if the campaign is not closed.
     modifier campaignClosed() {
         require(_campaignStarted, 'Artist didn\'t start the campaign yet');
-        require(!_campaignInProgress || _endTimestamp < block.timestamp, 'Campaign in progress');
+        require(!_campaignInProgress || endTimestamp < block.timestamp, 'Campaign in progress');
         _;
     }
 
@@ -112,11 +112,11 @@ contract CrowdfundingCampaign is ERC1155, ERC1155Supply {
 
         uint256 _startTimestamp = block.timestamp;
 
-        _endTimestamp = _startTimestamp + 8 weeks;
+        endTimestamp = _startTimestamp + 8 weeks;
         _campaignStarted = true;
         _campaignInProgress = true;
 
-        emit CampaignStarted(_startTimestamp, _endTimestamp);
+        emit CampaignStarted(_startTimestamp, endTimestamp);
     }
 
     /// @dev Closes the crowdfunding campaign.

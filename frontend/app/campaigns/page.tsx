@@ -13,7 +13,6 @@ import IsConnected from '@/components/IsConnected'
 
 const Campaigns = () => {
     const { address, isConnected } = useAccount()
-    const [campaignAddr, setCampaignAddr] = useState<`0x${string}`>()
     const [campaigns, setCampaigns] = useState<CampaignWithArtist[]>([])
 
     useEffect(() => {
@@ -21,8 +20,6 @@ const Campaigns = () => {
             let data: CampaignWithArtist[] = []
             getCampaignAddedEvents().then(events => {
                 for (let i = 0; i < events.length; i++) {
-                    setCampaignAddr(events[i].args._campaignAddr)
-
                     getCampaignWithArtist(address as `0x${string}`, events[i].args._campaignAddr).then(
                         campaign => data = [...data, campaign]
                     ).catch(err =>
@@ -60,7 +57,7 @@ const Campaigns = () => {
                             </CardBody>
                             <Divider />
                             <CardFooter>
-                                <Link as={NextLink} href={`/campaigns/${campaignAddr}`} className='rounded-lg px-5 py-2 font-medium bg-indigo-500 hover:bg-indigo-800 hover:text-slate-300' style={{ textDecoration: 'none' }}>
+                                <Link as={NextLink} href={`/campaigns/${campaign.campaignAddr}`} className='rounded-lg px-5 py-2 font-medium bg-indigo-500 hover:bg-indigo-800 hover:text-slate-300' style={{ textDecoration: 'none' }}>
                                     See mint
                                 </Link>
                             </CardFooter>

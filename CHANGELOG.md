@@ -1,14 +1,29 @@
 # Changelog
 
-## 0.15.0 (2023-07-19)
+## 0.16.0 (2023-07-19)
 
-### feat: Implement `withdraw` function in `TuneTogether`
+### feat: Implement `Campaign` page component
 
-- Add a `withdraw` function in `TuneTogether` to withdraw th boost fund
+- Implement mint function on `Campaign` page component
+- Fix issue in `CreateCampaign` when redirect to the created campaign
+- Fix link issue in `Campaigns` page component
+- Update `Loader` component to accept a waiting message
+- Add new constants
+- Implement `CampaignTierInfo` interface
+- Implement new method in `utils` file
+- Switch `_endTimestamp` private variable from `CrowdfundingCampaign.sol` to public
+- Add `.env` variable
 ---
 
 <details>
   <summary>See old changelog</summary>
+
+  ## 0.15.0 (2023-07-19)
+
+  ### feat: Implement `withdraw` function in `TuneTogether`
+
+  - Add a `withdraw` function in `TuneTogether` to withdraw th boost fund
+  ---
 
   ## 0.14.0 (2023-07-19)
 
