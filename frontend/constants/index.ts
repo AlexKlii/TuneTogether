@@ -741,6 +741,19 @@ export const crowdfundingCampaignAbi = [
     },
     {
         "inputs": [],
+        "name": "campaignInProgress",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
         "name": "closeCampaign",
         "outputs": [],
         "stateMutability": "nonpayable",
@@ -799,6 +812,19 @@ export const crowdfundingCampaignAbi = [
                 "internalType": "uint8",
                 "name": "",
                 "type": "uint8"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "fundWithdrawn",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
             }
         ],
         "stateMutability": "view",

@@ -49,7 +49,7 @@ const Campaigns = () => {
                                 />
                                 <Stack mt='6' spacing='3'>
                                     <Heading size='md'>{campaign.name} - by {campaign.artistName}</Heading>
-                                    <Text>{campaign.description}</Text>
+                                    <Text className='w-full whitespace-nowrap overflow-hidden overflow-ellipsis'>{campaign.description}</Text>
                                     <Text color='indigo.600' fontSize='2xl'>
                                         Objectif: {campaign.objectif} USDC
                                     </Text>

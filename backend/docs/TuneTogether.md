@@ -14,6 +14,7 @@ struct Campaign {
   uint8 nbTiers;
   address artist;
   uint256 boost;
+  uint256 objectif;
 }
 ```
 
@@ -24,6 +25,7 @@ struct Artist {
   string name;
   string bio;
   uint8 feeSchedule;
+  address[] campaigns;
 }
 ```
 
@@ -63,6 +65,12 @@ event CampaignUpdated(address _campaignAddr)
 event CampaignBoosted(address _contractAddr, uint256 _timestamp)
 ```
 
+### FundWithdraw
+
+```solidity
+event FundWithdraw(uint256 _balance, uint256 _timestamp)
+```
+
 ### constructor
 
 ```solidity
@@ -81,7 +89,7 @@ _Initializes the TuneTogether contract._
 ### createNewCampaign
 
 ```solidity
-function createNewCampaign(string _campaignName, string _description, uint8 _fees, string _artistName, string _bio, string _uri, uint8 _nbTiers) external
+function createNewCampaign(string _campaignName, string _description, uint8 _fees, string _artistName, string _bio, string _uri, uint8 _nbTiers, uint256 _objectif) external
 ```
 
 _Creates a new campaign and associates it with an artist._
@@ -97,6 +105,7 @@ _Creates a new campaign and associates it with an artist._
 | _bio | string | The bio of the artist. |
 | _uri | string | The URI of the campaign metadata. |
 | _nbTiers | uint8 | The number of tier prices in the campaign. |
+| _objectif | uint256 | The price objectif of the campaign. |
 
 ### updateCampaignInfo
 
@@ -188,4 +197,12 @@ _Sets a boost for a campaign by the artist._
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | _campaignAddr | address | The address of the campaign to boost. |
+
+### withdraw
+
+```solidity
+function withdraw() external
+```
+
+_Withdraws funds from boost._
 

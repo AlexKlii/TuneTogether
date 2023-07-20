@@ -578,6 +578,14 @@ describe('TuneTogether', () => {
       await expect(tuneTogether.connect(artist).setBoost(campaignAddr, {value: ethers.parseEther('0.001')})).to.emit(crowdfundingCampaign, 'Boosted')
     })
 
+    it('Revert if campaign already boosted', async () => {
+      const { tuneTogether, artist, crowdfundingCampaign, campaignAddr } = await loadFixture(deployFixtureWithCampaign)
+      await crowdfundingCampaign.connect(artist).startCampaign()
+      await tuneTogether.connect(artist).setBoost(campaignAddr, {value: ethers.parseEther('0.001')})
+
+      await expect(tuneTogether.connect(artist).setBoost(campaignAddr, {value: ethers.parseEther('0.001')})).to.be.revertedWith('Campaign already boosted')
+    })
+
     it('Revert if not the campaign artist', async () => {
       const { tuneTogether, owner, crowdfundingCampaign, artist, campaignAddr } = await loadFixture(deployFixtureWithCampaign)
       await crowdfundingCampaign.connect(artist).startCampaign()

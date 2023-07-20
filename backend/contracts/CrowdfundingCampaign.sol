@@ -11,7 +11,6 @@ import '../node_modules/@openzeppelin/contracts/token/ERC20/IERC20.sol';
 contract CrowdfundingCampaign is ERC1155, ERC1155Supply {
     string  private _baseUri;
     bool    private _campaignStarted;
-    bool    private _campaignInProgress;
     uint8   private _nbFilledTiers;
     address private _tuneTogetherAddr;
     IERC20  private _usdc;
@@ -24,6 +23,8 @@ contract CrowdfundingCampaign is ERC1155, ERC1155Supply {
     uint    public boost;
     uint    public objectif;
     uint256 public endTimestamp;
+    bool    public campaignInProgress;
+    bool    public fundWithdrawn;
 
     mapping(uint8 => uint) private tierPrices;
 
@@ -53,9 +54,9 @@ contract CrowdfundingCampaign is ERC1155, ERC1155Supply {
     }
 
     /// @dev Throws if the campaign is not in progress.
-    modifier campaignInProgress() {
+    modifier campaignIsInProgress() {
         require(_campaignStarted, 'Artist didn\'t start the campaign yet');
-        require(_campaignInProgress, 'Campaign closed');
+        require(campaignInProgress, 'Campaign closed');
         require(endTimestamp > block.timestamp, 'Campaign ended');
         _;
     }
@@ -63,7 +64,7 @@ contract CrowdfundingCampaign is ERC1155, ERC1155Supply {
     /// @dev Throws if the campaign is not closed.
     modifier campaignClosed() {
         require(_campaignStarted, 'Artist didn\'t start the campaign yet');
-        require(!_campaignInProgress || endTimestamp < block.timestamp, 'Campaign in progress');
+        require(!campaignInProgress || endTimestamp < block.timestamp, 'Campaign in progress');
         _;
     }
 
@@ -92,7 +93,7 @@ contract CrowdfundingCampaign is ERC1155, ERC1155Supply {
     /// @dev Mints a specific amount of tokens to the caller.
     /// @param _id The ID of the token to mint.
     /// @param _amount The amount of tokens to mint.
-    function mint(uint8 _id, uint256 _amount) public campaignInProgress {
+    function mint(uint8 _id, uint256 _amount) public campaignIsInProgress {
         require(_usdc.balanceOf(msg.sender) >= _amount * tierPrices[_id], 'Not enough balance');
 
         _usdc.transferFrom(msg.sender, address(this), _amount * tierPrices[_id]);
@@ -114,14 +115,14 @@ contract CrowdfundingCampaign is ERC1155, ERC1155Supply {
 
         endTimestamp = _startTimestamp + 8 weeks;
         _campaignStarted = true;
-        _campaignInProgress = true;
+        campaignInProgress = true;
 
         emit CampaignStarted(_startTimestamp, endTimestamp);
     }
 
     /// @dev Closes the crowdfunding campaign.
-    function closeCampaign() external onlyArtist campaignInProgress {
-        _campaignInProgress = false;
+    function closeCampaign() external onlyArtist campaignIsInProgress {
+        campaignInProgress = false;
         emit CampaignClosed(block.timestamp);
     }
 
@@ -167,13 +168,16 @@ contract CrowdfundingCampaign is ERC1155, ERC1155Supply {
 
     /// @dev Sets the boost timestamp for the campaign.
     /// @param _timestamp The boost timestamp.
-    function setBoost(uint _timestamp) external isContractOwner campaignInProgress {
+    function setBoost(uint _timestamp) external isContractOwner campaignIsInProgress {
         boost = _timestamp;
         emit Boosted(boost);
     }
 
     /// @dev Withdraws funds from the campaign.
     function withdraw() external onlyArtist campaignClosed {
+        require(!fundWithdrawn, 'Fund already withdrawn');
+
+        fundWithdrawn = true;
         uint ethBalance = address(this).balance;
         uint usdcBalance = _usdc.balanceOf(address(this));
 
