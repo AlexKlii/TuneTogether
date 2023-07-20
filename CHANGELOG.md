@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.16.3 (2023-07-20)
+
+### feat: Update campaign default cover
+
+- Update campaign default cover with TuneToghether logo
+- Update favicon with TuneTogether logo
+- Implement `Homepage` page component
+---
+
 ## 0.16.2 (2023-07-19)
 
 ### fix: Fix error on second mint in `Campaign` page component

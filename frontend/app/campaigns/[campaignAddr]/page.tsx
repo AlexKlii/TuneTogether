@@ -130,11 +130,12 @@ const Campaign = ({ params }: { params: { campaignAddr: `0x${string}` } }) => {
                         overflow='hidden'
                         marginBottom='20'
                     >
+                        {/* @TODO: Add a campaign.cover field in SmartContract */}
                         <Image
                             objectFit='cover'
                             maxW={{ base: '100%', sm: '30%' }}
-                            src='https://www.incimages.com/uploaded_files/image/1920x1080/getty_922112026_399100.jpg'
-                            alt='Crowdfunding campaign'
+                            src='/img/default_campaign_cover.png'
+                            alt='Crowdfunding campaign cover'
                         />
 
                         <Stack className='w-full'>

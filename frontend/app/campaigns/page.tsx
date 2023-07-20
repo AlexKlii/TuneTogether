@@ -43,8 +43,8 @@ const Campaigns = () => {
                             <CardBody>
                                 <Image
                                     // @TODO: Add a campaign.cover field in SmartContract 
-                                    src='https://www.incimages.com/uploaded_files/image/1920x1080/getty_922112026_399100.jpg'
-                                    alt='Crowdfunding campaign'
+                                    src='/img/default_campaign_cover.png'
+                                    alt='Crowdfunding campaign cover'
                                     borderRadius='lg'
                                 />
                                 <Stack mt='6' spacing='3'>
