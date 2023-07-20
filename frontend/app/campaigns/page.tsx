@@ -48,7 +48,10 @@ const Campaigns = () => {
                                     borderRadius='lg'
                                 />
                                 <Stack mt='6' spacing='3'>
-                                    <Heading size='md'>{campaign.name} - by {campaign.artistName}</Heading>
+                                    <Heading size='md'>
+                                        {campaign.name} - by {campaign.artistName}
+                                        {!campaign.campaignClosed && campaign.isBoosted && <Text className='font-semibold italic text-orange-400 text-xs'>Boosted</Text>}
+                                    </Heading>
                                     <Text className='w-full whitespace-nowrap overflow-hidden overflow-ellipsis'>{campaign.description}</Text>
                                     <Text color='indigo.600' fontSize='2xl'>
                                         Objectif: {campaign.objectif} USDC

@@ -9,7 +9,7 @@ const CardLoader = ({ loading, color, children }: { loading: boolean, color: str
 
     useEffect(() => {
         setStartColor(`${color}.600`)
-        setEndColor(`${color}.600`)
+        setEndColor(`${color}.800`)
     }, [color])
 
     return (!loading ? children

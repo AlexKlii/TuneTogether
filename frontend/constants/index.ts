@@ -3,6 +3,7 @@ export const uscdContractAddress = `${process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDR
 export const genesisBlock = `${process.env.NEXT_PUBLIC_GENESIS_BLOCK}`
 export const network = `${process.env.NEXT_PUBLIC_NETWORK}`
 export const JWT = `Bearer ${process.env.NEXT_PUBLIC_PINATA_JWT}`
+export const alchemyId = `${process.env.NEXT_PUBLIC_ALCHEMY_ID}`
 
 export const CampaignAdded = 'event CampaignAdded(address _artistAddr, address _campaignAddr)'
 

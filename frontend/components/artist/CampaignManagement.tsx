@@ -11,8 +11,8 @@ const CampaignManagement = ({ campaign, isLoading, usdcWithdrawn }: { campaign: 
     const toast = useToast()
 
     const withdraw = () => {
+        setLoading(true)
         writeForContractByFunctionName(campaign.campaignAddr, 'withdraw').then(() => {
-            setLoading(true)
             toast({
                 title: 'Success',
                 description: 'Campaign funds have been successfully withdrawn.',
@@ -21,6 +21,7 @@ const CampaignManagement = ({ campaign, isLoading, usdcWithdrawn }: { campaign: 
                 isClosable: true,
             })
         }).catch(err => {
+            setLoading(false)
             toast({
                 title: 'An error occurred!',
                 description: err.message,
@@ -32,8 +33,8 @@ const CampaignManagement = ({ campaign, isLoading, usdcWithdrawn }: { campaign: 
     }
 
     const boost = () => {
+        setLoading(true)
         boostCampaign(campaign.campaignAddr).then(() => {
-            setLoading(true)
             toast({
                 title: 'Success',
                 description: 'Campaign successfully boosted for 1 week.',
@@ -42,6 +43,7 @@ const CampaignManagement = ({ campaign, isLoading, usdcWithdrawn }: { campaign: 
                 isClosable: true,
             })
         }).catch(err => {
+            setLoading(false)
             toast({
                 title: 'An error occurred!',
                 description: err.message,
@@ -53,8 +55,8 @@ const CampaignManagement = ({ campaign, isLoading, usdcWithdrawn }: { campaign: 
     }
 
     const closeCampaign = () => {
+        setLoading(true)
         writeForContractByFunctionName(campaign.campaignAddr, 'closeCampaign').then(() => {
-            setLoading(true)
             toast({
                 title: 'Success',
                 description: 'Campaign successfully closed. Please remember to retrieve campaign funds.',
@@ -63,6 +65,7 @@ const CampaignManagement = ({ campaign, isLoading, usdcWithdrawn }: { campaign: 
                 isClosable: true,
             })
         }).catch(err => {
+            setLoading(false)
             toast({
                 title: 'An error occurred!',
                 description: err.message,
