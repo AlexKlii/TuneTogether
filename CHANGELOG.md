@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.17.1 (2023-07-20)
+
+### fix: Fix error on mumbai network
+
 ## 0.17.0 (2023-07-20)
 
 ### feat: Implement `CampaignManagement` component for artists

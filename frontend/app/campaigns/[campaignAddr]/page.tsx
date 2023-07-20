@@ -34,10 +34,13 @@ const Campaign = ({ params }: { params: { campaignAddr: `0x${string}` } }) => {
     const campaignAddr = params.campaignAddr
 
     const approveAllowanceForMint = (id: number, price: number): void => {
+        setMintId(id)
         approveAllowance(address as `0x${string}`, campaignAddr, BigInt(price)).then(() => {
-            setMintId(id)
             setLoading(true)
-        }).catch(() => setLoading(false))
+        }).catch(() => {
+            setLoading(false)
+            setMintId(0)
+        })
     }
 
     useEffect(() => {
@@ -217,7 +220,7 @@ const Campaign = ({ params }: { params: { campaignAddr: `0x${string}` } }) => {
                                                 </Box>
 
                                                 <Box className='px-2 mt-4 align-top'>
-                                                    <Button variant='solid' colorScheme='indigo' onClick={() => approveAllowanceForMint(tierInfo.id, tierInfo.price)}>
+                                                    <Button variant='solid' isDisabled={mintId !== 0} colorScheme='indigo' onClick={() => approveAllowanceForMint(tierInfo.id, tierInfo.price)}>
                                                         MINT
                                                     </Button>
                                                 </Box>

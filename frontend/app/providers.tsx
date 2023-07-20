@@ -8,6 +8,8 @@ import { configureChains, createConfig, WagmiConfig } from 'wagmi'
 import { hardhat, sepolia, polygonMumbai } from 'wagmi/chains'
 import { publicProvider } from 'wagmi/providers/public'
 import { ChakraProvider, extendTheme } from '@chakra-ui/react'
+import { alchemyProvider } from 'wagmi/providers/alchemy'
+import { alchemyId } from '@/constants'
 
 const { chains, publicClient, webSocketPublicClient } = configureChains(
     [
@@ -15,7 +17,10 @@ const { chains, publicClient, webSocketPublicClient } = configureChains(
         polygonMumbai,
         ...(process.env.NEXT_PUBLIC_ENABLE_TESTNETS === 'true' ? [hardhat] : [])
     ],
-    [publicProvider()]
+    [
+        publicProvider(),
+        alchemyProvider({ apiKey: alchemyId })
+    ]
 )
 
 const projectId: string = process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID || ''
@@ -43,7 +48,7 @@ const connectors = connectorsForWallets([
 ])
 
 const wagmiConfig = createConfig({
-    autoConnect: false,
+    autoConnect: true,
     connectors,
     publicClient,
     webSocketPublicClient
