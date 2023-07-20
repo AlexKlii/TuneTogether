@@ -125,6 +125,7 @@ contract TuneTogether is Ownable {
     /// @param _campaignAddr The address of the campaign to boost.
     function setBoost(address _campaignAddr) external payable {
         require(campaigns[_campaignAddr].artist == msg.sender, 'You\'re not the campaign artist');
+        require(campaigns[_campaignAddr].boost < block.timestamp, 'Campaign already boosted');
         require(msg.value == 0.001 ether, 'Wrong value');
 
         _crowdfundingCampaign = CrowdfundingCampaign(_campaignAddr);

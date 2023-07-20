@@ -40,6 +40,30 @@ uint8 nbTiers
 uint256 boost
 ```
 
+### objectif
+
+```solidity
+uint256 objectif
+```
+
+### endTimestamp
+
+```solidity
+uint256 endTimestamp
+```
+
+### campaignInProgress
+
+```solidity
+bool campaignInProgress
+```
+
+### fundWithdrawn
+
+```solidity
+bool fundWithdrawn
+```
+
 ### CampaignStarted
 
 ```solidity
@@ -100,10 +124,10 @@ modifier campaignNotStarted()
 
 _Throws if the campaign has already started._
 
-### campaignInProgress
+### campaignIsInProgress
 
 ```solidity
-modifier campaignInProgress()
+modifier campaignIsInProgress()
 ```
 
 _Throws if the campaign is not in progress._
@@ -119,7 +143,7 @@ _Throws if the campaign is not closed._
 ### constructor
 
 ```solidity
-constructor(string baseUri_, address tuneTogetherAddr_, address usdcAddr_, address _artistAddr, string _name, uint8 _fees, string _description, uint8 _nbTiers) public
+constructor(string baseUri_, address tuneTogetherAddr_, address usdcAddr_, address _artistAddr, string _name, uint8 _fees, string _description, uint8 _nbTiers, uint256 _objectif) public
 ```
 
 _Initializes the CrowdfundingCampaign contract._
@@ -136,6 +160,7 @@ _Initializes the CrowdfundingCampaign contract._
 | _fees | uint8 | The fees of the campaign. |
 | _description | string | The description of the campaign. |
 | _nbTiers | uint8 | The number of tier prices in the campaign. |
+| _objectif | uint256 | The price objectif of the campaign. |
 
 ### mint
 

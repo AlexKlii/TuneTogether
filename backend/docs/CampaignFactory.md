@@ -27,7 +27,7 @@ _Throws if the caller is not the owner of the contract._
 ### createCrowdfundingCampaign
 
 ```solidity
-function createCrowdfundingCampaign(string _uri, address _artistAddr, string _name, uint8 _fees, string _description, uint8 _nbTiers, address _usdcAddr) external returns (address campaignAddress)
+function createCrowdfundingCampaign(string _uri, address _artistAddr, string _name, uint8 _fees, string _description, uint8 _nbTiers, address _usdcAddr, uint256 _objectif) external returns (address campaignAddress)
 ```
 
 _Creates a new crowdfunding campaign._
@@ -43,6 +43,7 @@ _Creates a new crowdfunding campaign._
 | _description | string | The description of the campaign. |
 | _nbTiers | uint8 | The number of tier prices in the campaign. |
 | _usdcAddr | address | The address of the USDC token contract. |
+| _objectif | uint256 | The price objectif of the campaign. |
 
 #### Return Values
 

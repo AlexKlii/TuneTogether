@@ -292,6 +292,15 @@ describe('CrowdfundingCampaign', () => {
 
       await expect(crowdfundingCampaign.connect(artist).withdraw()).to.emit(crowdfundingCampaign, 'FundWithdraw')
     })
+    
+    it('Revert if fund already withdrawn', async () => {
+      const { crowdfundingCampaign, artist, investor } = await loadFixture(deployFixtureWithCampaign)
+      await crowdfundingCampaign.connect(investor).mint(1, 4)
+      await time.increase(4838420);
+      crowdfundingCampaign.connect(artist).withdraw()
+
+      await expect(crowdfundingCampaign.connect(artist).withdraw()).to.be.revertedWith('Fund already withdrawn')
+    })
 
     it('Revert if not the campaign artist', async () => {
       const { crowdfundingCampaign, artist, investor } = await loadFixture(deployFixtureWithCampaign)

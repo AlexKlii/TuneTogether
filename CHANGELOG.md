@@ -1,41 +1,63 @@
 # Changelog
 
-## 0.16.3 (2023-07-20)
+## 0.17.0 (2023-07-20)
 
-### feat: Update campaign default cover
+### feat: Implement `CampaignManagement` component for artists
 
-- Update campaign default cover with TuneToghether logo
-- Update favicon with TuneTogether logo
-- Implement `Homepage` page component
----
+- Frontend
+  - Update `Campaign` page component to implement `CampaignManagement` for artists
+  - Implement `CampaignManagement` component with action:
+    - `close` 
+    - `boost`
+    - `withdraw`
+  - Implement `CardLoader` component
+  - Update `CampaignWithArtist` interface
 
-## 0.16.2 (2023-07-19)
-
-### fix: Fix error on second mint in `Campaign` page component
----
-
-## 0.16.1 (2023-07-19)
-
-### fix: Fix loading in `CreateCampaign` page component
----
-
-## 0.16.0 (2023-07-19)
-
-### feat: Implement `Campaign` page component
-
-- Implement mint function on `Campaign` page component
-- Fix issue in `CreateCampaign` when redirect to the created campaign
-- Fix link issue in `Campaigns` page component
-- Update `Loader` component to accept a waiting message
-- Add new constants
-- Implement `CampaignTierInfo` interface
-- Implement new method in `utils` file
-- Switch `_endTimestamp` private variable from `CrowdfundingCampaign.sol` to public
-- Add `.env` variable
+- Backend
+  - Update `CrowdfundingCampaign` contract
+    - Add new variable `fundWithdrawn`
+    - Switch private variable `campaignInProgress` to public
+  - Add a require on `setBoost` method from `TuneTogether` contract
+  - Generate new doc files
+  - Update unit tests
 ---
 
 <details>
   <summary>See old changelog</summary>
+
+  ## 0.16.3 (2023-07-20)
+
+  ### feat: Update campaign default cover
+
+  - Update campaign default cover with TuneToghether logo
+  - Update favicon with TuneTogether logo
+  - Implement `Homepage` page component
+  ---
+
+  ## 0.16.2 (2023-07-19)
+
+  ### fix: Fix error on second mint in `Campaign` page component
+  ---
+
+  ## 0.16.1 (2023-07-19)
+
+  ### fix: Fix loading in `CreateCampaign` page component
+  ---
+
+  ## 0.16.0 (2023-07-19)
+
+  ### feat: Implement `Campaign` page component
+
+  - Implement mint function on `Campaign` page component
+  - Fix issue in `CreateCampaign` when redirect to the created campaign
+  - Fix link issue in `Campaigns` page component
+  - Update `Loader` component to accept a waiting message
+  - Add new constants
+  - Implement `CampaignTierInfo` interface
+  - Implement new method in `utils` file
+  - Switch `_endTimestamp` private variable from `CrowdfundingCampaign.sol` to public
+  - Add `.env` variable
+  ---
 
   ## 0.15.0 (2023-07-19)
 

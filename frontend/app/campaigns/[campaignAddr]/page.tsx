@@ -3,10 +3,12 @@
 import IsConnected from '@/components/IsConnected'
 import Loader from '@/components/Loader'
 import PageTitle from '@/components/layout/PageTitle'
+import CampaignManagement from '@/components/artist/CampaignManagement'
+
 import { crowdfundingCampaignAbi, uscdContractAddress, usdcAbi } from '@/constants'
 import { CampaignWithArtist } from '@/interfaces/Campaign'
 import { CampaignTierInfo } from '@/interfaces/Campaign/TierInfo'
-import { approveAllowance, campaignEndTimestamp, getCampaignWithArtist, readForContractByFunctionName, writeForContractByFunctionName } from '@/utils'
+import { approveAllowance, getCampaignWithArtist, readForContractByFunctionName, writeForContractByFunctionName } from '@/utils'
 import { Box, Button, Card, CardBody, CardFooter, Heading, Image, Stack, Text, useToast } from '@chakra-ui/react'
 import { useEffect, useState } from 'react'
 import { useAccount, useContractEvent } from 'wagmi'
@@ -23,7 +25,11 @@ const Campaign = ({ params }: { params: { campaignAddr: `0x${string}` } }) => {
     const [logOwner, setLogOwner] = useState<`0x${string}`>()
     const [logMint, setLogMint] = useState<`0x${string}`>()
     const [loading, setLoading] = useState(false)
-    const [endTimestamp, setEndTimestamp] = useState<number|null>()
+    const [isArtist, setIsArtist] = useState(false)
+    const [logBoost, setLogBoost] = useState<number>()
+    const [logClosed, setLogClosed] = useState<number>()
+    const [logWithdraw, setLogWithdraw] = useState<number>()
+    const [loadingManagement, setLoadingManagement] = useState(true)
 
     const campaignAddr = params.campaignAddr
 
@@ -40,38 +46,38 @@ const Campaign = ({ params }: { params: { campaignAddr: `0x${string}` } }) => {
 
         if (isConnected) {
             getCampaignWithArtist(address as `0x${string}`, campaignAddr).then(
-                campaign => setCampaign(campaign)
-            ).catch(err => console.log(err))
-            .finally(()=> setCampaignLoading(false))
+                campaign => {
+                    setCampaign(campaign)
+                    setIsArtist(address === campaign.artist)
 
-            campaignEndTimestamp(campaignAddr, address as `0x${string}`).then(timestamp => {
-                setEndTimestamp(timestamp)
-                if (0 === campaignTiersInfo.tiers.length && timestamp && timestamp > Date.now()) {
-                    readForContractByFunctionName<number>(campaignAddr, 'nbTiers', address as `0x${string}`).then(
-                        async nbTiers => {
-                            campaignTiersInfo.nbTiers = nbTiers
-                            campaignTiersInfo.tiers = []
-                            for (let i = 1; i <= nbTiers; i++) {
-                                await readForContractByFunctionName<string>(campaignAddr, 'uri', address as `0x${string}`, i).then(
-                                    async uri => await readForContractByFunctionName<number>(campaignAddr, 'getTierPrice', address as `0x${string}`, i).then(
-                                        price => campaignTiersInfo.tiers.push({ id: i, uri, price: Number(price) })
+                    if (0 === campaignTiersInfo.tiers.length && !campaign.campaignClosed) {
+                        readForContractByFunctionName<number>(campaignAddr, 'nbTiers', address as `0x${string}`).then(
+                            async nbTiers => {
+                                campaignTiersInfo.nbTiers = nbTiers
+                                campaignTiersInfo.tiers = []
+                                for (let i = 1; i <= nbTiers; i++) {
+                                    await readForContractByFunctionName<string>(campaignAddr, 'uri', address as `0x${string}`, i).then(
+                                        async uri => await readForContractByFunctionName<number>(campaignAddr, 'getTierPrice', address as `0x${string}`, i).then(
+                                            price => campaignTiersInfo.tiers.push({ id: i, uri, price: Number(price) })
+                                        )
                                     )
-                                )
+                                }
                             }
-                        }
-                    ).finally(() => {
-                        setCampaignTiersInfo(campaignTiersInfo)
-                        setInfoLoading(false)
-                    })
-                } else setInfoLoading(false)
-            })
+                        ).finally(() => {
+                            setCampaignTiersInfo(campaignTiersInfo)
+                            setInfoLoading(false)
+                        })
+                    } else setInfoLoading(false)
+                }
+            )
+            .catch(err => console.log(err))
+            .finally(()=> setCampaignLoading(false))
         }
-    }, [campaignAddr, address, campaignTiersInfo, isConnected])
+    }, [campaignAddr, address, campaignTiersInfo, isConnected, logBoost, logWithdraw, logClosed])
 
     useEffect(() => {
         if (0 !== mintId && logOwner === address) {
             const id = mintId.toString()
-            setMintId(0)
             setLogOwner(undefined)
 
             // Mint NFT after allowance approval
@@ -89,7 +95,7 @@ const Campaign = ({ params }: { params: { campaignAddr: `0x${string}` } }) => {
     }, [mintId, logOwner, address, campaignAddr, toast])
 
     useEffect(() => {
-        if (logMint === address) {
+        if (mintId !== 0 && logMint === address) {
             toast({
                 title: 'Minted !',
                 description: 'Successfully minted! See your NFT in your wallet in a few moments.',
@@ -103,7 +109,7 @@ const Campaign = ({ params }: { params: { campaignAddr: `0x${string}` } }) => {
             setLogMint(undefined)
             setLogOwner(undefined)
         }
-    }, [address, logMint, toast])
+    }, [address, logMint, toast, mintId])
 
     useContractEvent({
         address: campaignAddr,
@@ -119,11 +125,44 @@ const Campaign = ({ params }: { params: { campaignAddr: `0x${string}` } }) => {
         listener(log: any) { setLogOwner(log[0].args.owner) }
     })
 
+    useContractEvent({
+        address: campaignAddr,
+        abi: crowdfundingCampaignAbi,
+        eventName: 'Boosted',
+        listener(log: any) { 
+            const boost = Number(log[0].args._timestamp) * 1000
+            setLoadingManagement(false)
+            if (boost > Date.now()) setLogBoost(boost)
+        }
+    })
+
+    useContractEvent({
+        address: campaignAddr,
+        abi: crowdfundingCampaignAbi,
+        eventName: 'FundWithdraw',
+        listener(log: any) {
+            setLogWithdraw(Number(log[0].args._usdcBalance) / 10**6)
+            setLoadingManagement(false)
+        }
+    })
+
+    useContractEvent({
+        address: campaignAddr,
+        abi: crowdfundingCampaignAbi,
+        eventName: 'CampaignClosed',
+        listener(log: any) { 
+            setLogClosed(Number(log[0].args._endTimestamp))
+            setLoadingManagement(false)
+        }
+    })
+
     return (
         <IsConnected>
             <Loader isLoading={campaignLoading || loading} message={loading ? 'Mint in progress... Please wait a moment' : undefined}>
                 {campaign && <>
                     <PageTitle>Mint Page</PageTitle>
+
+                    {isArtist && <CampaignManagement campaign={campaign} usdcWithdrawn={logWithdraw} isLoading={loadingManagement} />}
 
                     <Card
                         direction={{ base: 'column', sm: 'row' }}
@@ -141,8 +180,8 @@ const Campaign = ({ params }: { params: { campaignAddr: `0x${string}` } }) => {
                         <Stack className='w-full'>
                             <CardBody>
                                 <Heading size='md' padding='2'>
-                                    {campaign.boost > Date.now() && <Text className='font-semibold italic text-orange-400'>Boosted</Text>}
-                                    {endTimestamp && endTimestamp > Date.now()
+                                    {!campaign.campaignClosed && campaign.isBoosted && <Text className='font-semibold italic text-orange-400'>Boosted</Text>}
+                                    {!campaign.campaignClosed
                                         ? <Text className='font-semibold italic text-indigo-500 pb-2'>Campaign in progress...</Text>
                                         : <Text className='font-semibold italic text-gray-500 pb-2'>Campaign finished</Text>
                                     }
@@ -167,11 +206,11 @@ const Campaign = ({ params }: { params: { campaignAddr: `0x${string}` } }) => {
                             </CardBody>
 
                             
-                            {endTimestamp && endTimestamp > Date.now() &&
+                            {!campaign.campaignClosed &&
                                 <CardFooter>
                                     <Loader isLoading={infoLoading}>
                                         {campaignTiersInfo.tiers.map((tierInfo, i) =>
-                                            <Box key={i} className='w-1/3 text-center'>
+                                            <Box key={i} className='w-full text-center'>
                                                 <Box className='px-2 mt-4 align-top'>
                                                     <span className='font-semibold italic'>Tier {i+1}:</span>
                                                     <span className='px-3'>{tierInfo.price / 10**6} USDC</span>

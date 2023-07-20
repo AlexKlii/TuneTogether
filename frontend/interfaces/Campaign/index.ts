@@ -13,4 +13,8 @@ export interface CampaignWithArtist extends Campaign {
     artistBio: string
     artistCampaigns: `0x${string}`[]
     campaignAddr: `0x${string}`
+    campaignClosed: boolean
+    endTimestamp: number
+    isBoosted: boolean
+    fundWithdrawn: boolean
 }
