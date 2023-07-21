@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.1 (2023-07-21)
+
+### feat: Update `Home` page component
+
+- Implement `AppLogo` in the `Home` component
+- Update `AppLogo` component to remove scale not working
+
 ## 1.0.0 (2023-07-21)
 
 ### feat: Implement `ArtistCampaigns` Component

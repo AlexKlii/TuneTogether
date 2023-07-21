@@ -1,10 +1,11 @@
+import AppLogo from '@/components/AppLogo'
 import IsConnected from '@/components/IsConnected'
 import PageTitle from '@/components/layout/PageTitle'
 
 const Home = () => {
   return (
     <IsConnected>
-      <PageTitle>Homepage</PageTitle>
+      <PageTitle><AppLogo textSize='text-6xl' pbSize='pb-0' /></PageTitle>
 
       <div className='w-1/2 mx-auto my-10 text-justify text-xl font-semibold text-indigo-200'>
         <p className='p-4'>Hey there, music maestros and groove gurus! 🎵</p>
