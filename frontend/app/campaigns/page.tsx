@@ -7,15 +7,18 @@ import { useAccount } from 'wagmi'
 import { CampaignWithArtist } from '@/interfaces/Campaign'
 import { getCampaignAddedEvents, getCampaignWithArtist } from '@/utils'
 
-import { Card, CardBody, CardFooter, Divider, Heading, Image, Link, Stack, Text } from '@chakra-ui/react'
+import { Box, Card, CardBody, CardFooter, Divider, Heading, Image, Link, Stack, Text } from '@chakra-ui/react'
 import PageTitle from '@/components/layout/PageTitle'
 import IsConnected from '@/components/IsConnected'
+import Loader from '@/components/Loader'
 
 const Campaigns = () => {
     const { address, isConnected } = useAccount()
     const [campaigns, setCampaigns] = useState<CampaignWithArtist[]>([])
+    const [loading, setLoading] = useState(true)
 
     useEffect(() => {
+        setLoading(true)
         if (isConnected) {
             let data: CampaignWithArtist[] = []
             getCampaignAddedEvents().then(events => {
@@ -26,6 +29,7 @@ const Campaigns = () => {
                         console.log(err)
                     ).finally(() => {
                         setCampaigns(data)
+                        if (i === events.length-1) setLoading(false)
                     })
                 }
             })
@@ -33,10 +37,20 @@ const Campaigns = () => {
     }, [address, isConnected])
 
     return (
-        <section>
-            <PageTitle>All Campaigns</PageTitle>
+        <IsConnected>
+            <Loader isLoading={loading}>
+                {0 === campaigns.length ?
+                    <Box className='text-center text-slate-200'>
+                        <PageTitle>No campaigns yet...</PageTitle>
+                        <Text className='text-2xl font-semibold text-indigo-300 pb-20'>Create your own right here and become the first legend</Text>
 
-            <IsConnected>
+                        <Link as={NextLink} href='/campaigns/create-campaign' className='rounded-lg p-5 font-medium hover:bg-indigo-800 hover:text-slate-300 bg-indigo-500' style={{ textDecoration: 'none' }}>
+                            Start the first campaign of TuneTogheter
+                        </Link>
+                    </Box>
+                    : <PageTitle>All Campaigns</PageTitle>
+                }
+
                 {campaigns.sort((a, b) => b.boost - a.boost).map((campaign: CampaignWithArtist, i) => (
                     <article key={i} className='w-1/3 p-5 inline-block'>
                         <Card maxW='sm'>
@@ -67,8 +81,8 @@ const Campaigns = () => {
                         </Card>
                     </article>
                 ))}
-            </IsConnected>
-        </section>
+            </Loader>
+        </IsConnected>
     )
 }
 export default Campaigns;

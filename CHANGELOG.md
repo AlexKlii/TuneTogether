@@ -1,41 +1,48 @@
 # Changelog
 
-## 0.17.2 (2023-07-21)
+## 0.18.0 (2023-07-21)
 
-### fix: Fix errors in `CampaignManagement` and `Campaign` components
+### feat: Implement `Footer` Component
 
-- Fix message after `withdrawn` action
-- Redirect if campaign not found
-- Fix infinite loader
-
-## 0.17.1 (2023-07-20)
-
-### fix: Fix error on mumbai network
-
-## 0.17.0 (2023-07-20)
-
-### feat: Implement `CampaignManagement` component for artists
-
-- Frontend
-  - Update `Campaign` page component to implement `CampaignManagement` for artists
-  - Implement `CampaignManagement` component with action:
-    - `close` 
-    - `boost`
-    - `withdraw`
-  - Implement `CardLoader` component
-  - Update `CampaignWithArtist` interface
-
-- Backend
-  - Update `CrowdfundingCampaign` contract
-    - Add new variable `fundWithdrawn`
-    - Switch private variable `campaignInProgress` to public
-  - Add a require on `setBoost` method from `TuneTogether` contract
-  - Generate new doc files
-  - Update unit tests
----
+- Implement `Footer` Component
+- Update `Campaigns` page component when no campaigns
 
 <details>
   <summary>See old changelog</summary>
+
+  ## 0.17.2 (2023-07-21)
+
+  ### fix: Fix errors in `CampaignManagement` and `Campaign` components
+
+  - Fix message after `withdrawn` action
+  - Redirect if campaign not found
+  - Fix infinite loader
+
+  ## 0.17.1 (2023-07-20)
+
+  ### fix: Fix error on mumbai network
+
+  ## 0.17.0 (2023-07-20)
+
+  ### feat: Implement `CampaignManagement` component for artists
+
+  - Frontend
+    - Update `Campaign` page component to implement `CampaignManagement` for artists
+    - Implement `CampaignManagement` component with action:
+      - `close` 
+      - `boost`
+      - `withdraw`
+    - Implement `CardLoader` component
+    - Update `CampaignWithArtist` interface
+
+  - Backend
+    - Update `CrowdfundingCampaign` contract
+      - Add new variable `fundWithdrawn`
+      - Switch private variable `campaignInProgress` to public
+    - Add a require on `setBoost` method from `TuneTogether` contract
+    - Generate new doc files
+    - Update unit tests
+  ---
 
   ## 0.16.3 (2023-07-20)
 
