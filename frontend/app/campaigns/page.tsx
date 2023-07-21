@@ -22,6 +22,7 @@ const Campaigns = () => {
         if (isConnected) {
             let data: CampaignWithArtist[] = []
             getCampaignAddedEvents().then(events => {
+                if (0 === events.length) setLoading(false)
                 for (let i = 0; i < events.length; i++) {
                     getCampaignWithArtist(address as `0x${string}`, events[i].args._campaignAddr).then(
                         campaign => data = [...data, campaign]
