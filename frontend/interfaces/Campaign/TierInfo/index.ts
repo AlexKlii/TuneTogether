@@ -5,6 +5,5 @@ export interface CampaignTierInfo {
 
 export interface TierInfo {
     id: number,
-    uri: string,
     price: number
 }

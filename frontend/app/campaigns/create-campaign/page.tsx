@@ -145,93 +145,88 @@ const CreateCampaign = () => {
             }
         }
 
-        const wrongTierPricesInfo = tierPrices.find(tierPrice => tierPrice.rewards.length === 0 || tierPrice.name.length < 3 || tierPrice.name.length > 15)
+        if (!hasError) {
+            const wrongTierPricesInfo = tierPrices.find(tierPrice => tierPrice.rewards.length === 0 || tierPrice.name.length < 3 || tierPrice.name.length > 15 || tierPrice.extensionError)
+    
+            if (!wrongTierPricesInfo) {
+                const wrongRewardsInfo = tierPrices.find(tierPrice => tierPrice.rewards.find(reward => reward.title.length < 2 || reward.title.length > 30 || reward.value.length < 2 || reward.value.length > 30))
 
-        let wrongFileExtension = false
-        const files: File[] = []
-
-        for (let i = 0; i < tierPrices.length; i++) {
-            const tierPrice = tierPrices[i];
-            if (tierPrice.extensionError) {
-                wrongFileExtension = true
-                break
-            }
-
-            if ('' !== tierPrice.img.name) {
-                var file = tierPrice.img
-                var blob = file.slice(0, file.size, 'image/png');
-                
-                // Change img name
-                tierPrice.img = new File([blob], `img/${tierPrice.id}.png`, {type: 'image/png'})
-                files.push(tierPrice.img)
-            }
-        }
-
-        if (!hasError && !wrongTierPricesInfo && !wrongFileExtension) {
-            if (files.length > 0) {
-                // Upload img folder from FormData to pinata
-                pinFilesToIPFS(files, name).then(result => {
-                    const blobs: Blob[] = []
-                    tierPrices.map((tierPrice: TierPrice) => {
-                        const attributes: {trait_type: string, value: string}[] = []
-                        tierPrice.rewards.map(reward =>
-                            attributes.push({
-                                trait_type: reward.title,
-                                value: reward.value,
+                if (!wrongRewardsInfo) {
+                    const files: File[] = []
+                    for (let i = 0; i < tierPrices.length; i++) {
+                        const tierPrice = tierPrices[i]
+                        if ('' !== tierPrice.img.name) {
+                            var file = tierPrice.img
+                            var blob = file.slice(0, file.size, 'image/png');
+                            
+                            // Change img name
+                            tierPrice.img = new File([blob], `img/${tierPrice.id}.png`, {type: 'image/png'})
+                            files.push(tierPrice.img)
+                        }
+                    }
+    
+                    if (files.length > 0) {
+                        // Upload img folder from FormData to pinata
+                        pinFilesToIPFS(files, name).then(result => {
+                            const blobs: Blob[] = []
+                            tierPrices.map((tierPrice: TierPrice) => {
+                                const attributes: {trait_type: string, value: string}[] = []
+                                tierPrice.rewards.map(reward =>
+                                    attributes.push({
+                                        trait_type: reward.title,
+                                        value: reward.value,
+                                    })
+                                )
+        
+                                const str = JSON.stringify({
+                                    description: description,
+                                    image: `ipfs://${result.IpfsHash}/${tierPrice.id}.png`,
+                                    name: tierPrice.name,
+                                    attributes: attributes
+                                })
+        
+                                const bytes = new TextEncoder().encode(str)
+                                const blob = new Blob([bytes], {
+                                    type: 'application/json;charset=utf-8'
+                                })
+        
+                                blobs.push(blob)
                             })
-                        )
-
-                        const str = JSON.stringify({
-                            description: description,
-                            image: `ipfs://${result.IpfsHash}/${tierPrice.id}.png`,
-                            name: tierPrice.name,
-                            attributes: attributes
-                        })
-
-                        const bytes = new TextEncoder().encode(str)
-                        const blob = new Blob([bytes], {
-                            type: 'application/json;charset=utf-8'
-                        })
-
-                        blobs.push(blob)
-                    })
-
-                    // Upload json folder from FormData to pinata
-                    uploadFromBuffer(blobs, name).then(data => {
-                        const uri: string = `ipfs://${data.IpfsHash}/`
-                        const objectifInWei = objectif * 10**6
-                        // call TuneTogether.createNewCampaign()
-                        writeContractByFunctionName('createNewCampaign', name, description, fees, artistName, bio, uri, tierPrices.length.toString(), objectifInWei.toString()).then(() => {
-                            console.log('Campaign created')
-                            toast({
-                                title: 'Campaign created',
-                                description: 'Successfully created new campaign',
-                                status: 'success',
-                                duration: 2000,
-                                isClosable: true,
+        
+                            // Upload json folder from FormData to pinata
+                            uploadFromBuffer(blobs, name).then(data => {
+                                const uri: string = `ipfs://${data.IpfsHash}/`
+                                const objectifInWei = objectif * 10**6
+                                writeContractByFunctionName('createNewCampaign', name, description, fees, artistName, bio, uri, tierPrices.length.toString(), objectifInWei.toString()).then(() => {
+                                    console.log('Campaign created')
+                                    toast({
+                                        title: 'Campaign created',
+                                        description: 'Successfully created new campaign',
+                                        status: 'success',
+                                        duration: 2000,
+                                        isClosable: true,
+                                    })
+                                })
+                                .catch(err => {
+                                    setLoading(false)
+                                    toast({
+                                        title: 'Unable to create campaign',
+                                        description: err.message,
+                                        status: 'error',
+                                        duration: 5000,
+                                        isClosable: true,
+                                    })
+                                })
+                            }).catch(err => {
+                                console.log(err)
+                                setLoading(false)
                             })
-                        })
-                        .catch(err => {
-                            // @TODO: unpin folders in pinata if an error occured
+                        }).catch(err => {
+                            console.log(err)
                             setLoading(false)
-                            toast({
-                                title: 'Unable to create campaign',
-                                description: err.message,
-                                status: 'error',
-                                duration: 5000,
-                                isClosable: true,
-                            })
                         })
-                    }).catch(err => {
-                        console.log(err)
-                        setLoading(false)
-                    })
-
-                }).catch(err => {
-                    console.log(err)
-                    setLoading(false)
-                })
-
+                    } else setLoading(false)
+                } else setLoading(false)
             } else setLoading(false)
         } else setLoading(false)
     }
@@ -379,7 +374,7 @@ const CreateCampaign = () => {
                                             ? errors.artistNameTooLong
                                                 ? <FormErrorMessage>Artist name should have a maximum of 20 characters.</FormErrorMessage>
                                                 : errors.artistNameTooShort && <FormErrorMessage>Artist name should have at least 5 characters.</FormErrorMessage>
-                                            : <FormHelperText>Enter you&apos;re artist name.</FormHelperText>
+                                            : <FormHelperText>Enter your artist name.</FormHelperText>
                                         }
                                     </FormControl>
 
@@ -394,7 +389,7 @@ const CreateCampaign = () => {
                                         />
                                         {isSubmitted
                                             ? errors.bioTooShort && <FormErrorMessage>Artist biography should have at least 10 characters.</FormErrorMessage>
-                                            : <FormHelperText>Enter you&apos;re artist biography.</FormHelperText>
+                                            : <FormHelperText>Enter your artist biography.</FormHelperText>
                                         }
                                     </FormControl>
                                 </fieldset>
