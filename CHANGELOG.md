@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.17.2 (2023-07-21)
+
+### fix: Fix errors in `CampaignManagement` and `Campaign` components
+
+- Fix message after `withdrawn` action
+- Redirect if campaign not found
+- Fix infinite loader
+
 ## 0.17.1 (2023-07-20)
 
 ### fix: Fix error on mumbai network

@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { BaseError, ContractFunctionRevertedError, createPublicClient, http, parseAbiItem, parseEther } from 'viem'
 import { prepareWriteContract, writeContract, readContract } from '@wagmi/core'
-import { contractAddress, crowdfundingCampaignAbi, tuneTogetherAbi, JWT, network, genesisBlock, CampaignAdded, usdcAbi, uscdContractAddress } from '@/constants'
+import { contractAddress, crowdfundingCampaignAbi, tuneTogetherAbi, JWT, network, genesisBlock, CampaignAdded, usdcAbi, uscdContractAddress, CampaignClosed, Boosted, FundWithdraw } from '@/constants'
 import { Artist } from '@/interfaces/Artist'
 import { hardhat, sepolia, polygonMumbai } from 'viem/chains'
 import { Campaign, CampaignWithArtist } from '@/interfaces/Campaign'
@@ -168,6 +168,45 @@ export const getCampaignAddedEvents = async (): Promise<any> => {
         return await client.getLogs({
             address: contractAddress,
             event: parseAbiItem(CampaignAdded),
+            fromBlock: BigInt(genesisBlock),
+            toBlock: 'latest'
+        })
+    } catch (err) {
+        throw formattedError(err)
+    }
+}
+
+export const getCampaignClosedEvent = async (campaignAddr: `0x${string}`): Promise<any> => {
+    try {
+        return await client.getLogs({
+            address: campaignAddr,
+            event: parseAbiItem(CampaignClosed),
+            fromBlock: BigInt(genesisBlock),
+            toBlock: 'latest'
+        })
+    } catch (err) {
+        throw formattedError(err)
+    }
+}
+
+export const getCampaignBoostedEvent = async (campaignAddr: `0x${string}`): Promise<any> => {
+    try {
+        return await client.getLogs({
+            address: campaignAddr,
+            event: parseAbiItem(Boosted),
+            fromBlock: BigInt(genesisBlock),
+            toBlock: 'latest'
+        })
+    } catch (err) {
+        throw formattedError(err)
+    }
+}
+
+export const getCampaignFundWithdrawnEvent = async (campaignAddr: `0x${string}`): Promise<any> => {
+    try {
+        return await client.getLogs({
+            address: campaignAddr,
+            event: parseAbiItem(FundWithdraw),
             fromBlock: BigInt(genesisBlock),
             toBlock: 'latest'
         })

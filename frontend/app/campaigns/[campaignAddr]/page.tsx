@@ -8,14 +8,16 @@ import CampaignManagement from '@/components/artist/CampaignManagement'
 import { crowdfundingCampaignAbi, uscdContractAddress, usdcAbi } from '@/constants'
 import { CampaignWithArtist } from '@/interfaces/Campaign'
 import { CampaignTierInfo } from '@/interfaces/Campaign/TierInfo'
-import { approveAllowance, getCampaignWithArtist, readForContractByFunctionName, writeForContractByFunctionName } from '@/utils'
+import { approveAllowance, getCampaignBoostedEvent, getCampaignClosedEvent, getCampaignFundWithdrawnEvent, getCampaignWithArtist, readForContractByFunctionName, writeForContractByFunctionName } from '@/utils'
 import { Box, Button, Card, CardBody, CardFooter, Heading, Image, Stack, Text, useToast } from '@chakra-ui/react'
 import { useEffect, useState } from 'react'
 import { useAccount, useContractEvent } from 'wagmi'
+import { useRouter } from 'next/navigation'
 
 const Campaign = ({ params }: { params: { campaignAddr: `0x${string}` } }) => {
     const { address, isConnected } = useAccount()
     const toast = useToast()
+    const { push } = useRouter()
 
     const [campaign, setCampaign] = useState<CampaignWithArtist>()
     const [campaignTiersInfo, setCampaignTiersInfo] = useState<CampaignTierInfo>({nbTiers: 0, tiers: []})
@@ -29,7 +31,7 @@ const Campaign = ({ params }: { params: { campaignAddr: `0x${string}` } }) => {
     const [logBoost, setLogBoost] = useState<number>()
     const [logClosed, setLogClosed] = useState<number>()
     const [logWithdraw, setLogWithdraw] = useState<number>()
-    const [loadingManagement, setLoadingManagement] = useState(true)
+    const [loadingManagement, setLoadingManagement] = useState(false)
 
     const campaignAddr = params.campaignAddr
 
@@ -50,6 +52,17 @@ const Campaign = ({ params }: { params: { campaignAddr: `0x${string}` } }) => {
         if (isConnected) {
             getCampaignWithArtist(address as `0x${string}`, campaignAddr).then(
                 campaign => {
+                    if ('' === campaign.name) {
+                        push('/')
+                        toast({
+                            title: '404 Error',
+                            description: 'Campaign does not exist',
+                            status: 'warning',
+                            duration: 5000,
+                            isClosable: true,
+                        })
+                    }
+
                     setCampaign(campaign)
                     setIsArtist(address === campaign.artist)
 
@@ -76,7 +89,26 @@ const Campaign = ({ params }: { params: { campaignAddr: `0x${string}` } }) => {
             .catch(err => console.log(err))
             .finally(()=> setCampaignLoading(false))
         }
-    }, [campaignAddr, address, campaignTiersInfo, isConnected, logBoost, logWithdraw, logClosed])
+    }, [campaignAddr, address, campaignTiersInfo, isConnected, logBoost, logWithdraw, logClosed, push, toast])
+
+    useEffect(() => {
+        setLoadingManagement(true)
+        getCampaignClosedEvent(campaignAddr).then(closedEvent => 
+            getCampaignBoostedEvent(campaignAddr).then(boosted => 
+                getCampaignFundWithdrawnEvent(campaignAddr).then(fundWithdrawn => {
+                    const withdrawnValue = Number(fundWithdrawn[0]?.args._usdcBalance) / 10**6
+                    const closedTimestamp = Number(closedEvent[0]?.args._endTimestamp) * 1000
+                    const boostedTimestamp = Number(boosted[boosted.length-1]?.args._timestamp) * 1000
+                    
+                    if (boostedTimestamp > Date.now()) setLogBoost(boostedTimestamp)
+                    if (!Number.isNaN(closedTimestamp)) setLogClosed(closedTimestamp)
+                    if (!Number.isNaN(withdrawnValue)) setLogWithdraw(withdrawnValue)
+
+                    setLoadingManagement(false)
+                })
+            )
+        )
+    }, [campaignAddr, address, isConnected])
 
     useEffect(() => {
         if (0 !== mintId && logOwner === address) {
@@ -132,8 +164,8 @@ const Campaign = ({ params }: { params: { campaignAddr: `0x${string}` } }) => {
         address: campaignAddr,
         abi: crowdfundingCampaignAbi,
         eventName: 'Boosted',
-        listener(log: any) { 
-            const boost = Number(log[0].args._timestamp) * 1000
+        listener(log: any) {
+            const boost = Number(log[log.length-1].args._timestamp) * 1000
             setLoadingManagement(false)
             if (boost > Date.now()) setLogBoost(boost)
         }
@@ -153,7 +185,7 @@ const Campaign = ({ params }: { params: { campaignAddr: `0x${string}` } }) => {
         address: campaignAddr,
         abi: crowdfundingCampaignAbi,
         eventName: 'CampaignClosed',
-        listener(log: any) { 
+        listener(log: any) {
             setLogClosed(Number(log[0].args._endTimestamp))
             setLoadingManagement(false)
         }
