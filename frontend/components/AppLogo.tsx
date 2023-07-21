@@ -1,6 +1,6 @@
 import { useRouter } from 'next/navigation'
 
-const AppLogo = ({ textSize, pbSize }: {textSize: 'text-md'|'text-xl'|'text-6xl', pbSize: 'pb-0'|'pb-2'|'pb-10'}) => {
+const AppLogo = ({ textSize, pbSize }: {textSize: 'text-md'|'text-xl'|'text-6xl', pbSize?: 'pb-0'|'pb-2'|'pb-10'}) => {
     const { push } = useRouter()
 
     return (
