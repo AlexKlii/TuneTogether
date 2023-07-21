@@ -1,56 +1,59 @@
 'use client'
 
 import NextLink from 'next/link'
+
 import { useEffect, useState } from 'react'
 import { useAccount } from 'wagmi'
+import { useRouter } from 'next/navigation'
 
 import { CampaignWithArtist } from '@/interfaces/Campaign'
-import { getCampaignAddedEvents, getCampaignWithArtist } from '@/utils'
+import { getArtist, getCampaignWithArtist } from '@/utils'
 
-import { Box, Card, CardBody, CardFooter, Divider, Heading, Image, Link, Stack, Text } from '@chakra-ui/react'
+import { Card, CardBody, CardFooter, Divider, Heading, Image, Link, Stack, Text, useToast } from '@chakra-ui/react'
 import PageTitle from '@/components/layout/PageTitle'
 import IsConnected from '@/components/IsConnected'
 import Loader from '@/components/Loader'
 
-const Campaigns = () => {
+const ArtistCampaigns = () => {
     const { address, isConnected } = useAccount()
     const [campaigns, setCampaigns] = useState<CampaignWithArtist[]>([])
     const [loading, setLoading] = useState(true)
+    const toast = useToast()
+    const { push } = useRouter()
 
     useEffect(() => {
         setLoading(true)
         if (isConnected) {
-            let data: CampaignWithArtist[] = []
-            getCampaignAddedEvents().then(events => {
-                if (0 === events.length) setLoading(false)
-                for (let i = 0; i < events.length; i++) {
-                    getCampaignWithArtist(address as `0x${string}`, events[i].args._campaignAddr).then(
+            getArtist(address as `0x${string}`).then(artist => {
+                if (0 === artist.campaigns.length) {
+                    push('/')
+                    toast({
+                        title: '404 Error',
+                        description: 'Artist does not exist',
+                        status: 'warning',
+                        duration: 5000,
+                        isClosable: true,
+                    })
+                }
+                let data: CampaignWithArtist[] = []
+                artist.campaigns.forEach((campaignAddr, i) => {
+                    getCampaignWithArtist(address as `0x${string}`, campaignAddr).then(
                         campaign => data = [...data, campaign]
                     ).catch(err =>
                         console.log(err)
                     ).finally(() => {
-                        setCampaigns(data.filter(campaign => !campaign.campaignClosed).sort((a, b) => b.boost - a.boost))
-                        if (i === events.length-1) setLoading(false)
+                        setCampaigns(data.sort((a, b) => b.endTimestamp - a.endTimestamp))
+                        if (i === artist.campaigns.length-1) setLoading(false)
                     })
-                }
+                })
             })
         }
-    }, [address, isConnected])
+    }, [address, isConnected, push, toast])
 
     return (
         <IsConnected>
             <Loader isLoading={loading}>
-                {0 === campaigns.length ?
-                    <Box className='text-center text-slate-200'>
-                        <PageTitle>No campaigns yet...</PageTitle>
-                        <Text className='text-2xl font-semibold text-indigo-300 pb-20'>Create your own right here and become the first legend</Text>
-
-                        <Link as={NextLink} href='/campaigns/create-campaign' className='rounded-lg p-5 font-medium hover:bg-indigo-800 hover:text-slate-300 bg-indigo-500' style={{ textDecoration: 'none' }}>
-                            Start the first campaign of TuneTogheter
-                        </Link>
-                    </Box>
-                    : <PageTitle>Live Campaigns</PageTitle>
-                }
+                <PageTitle>My Campaigns</PageTitle>
 
                 {campaigns.map((campaign: CampaignWithArtist, i) => (
                     <article key={i} className='w-1/3 p-5 inline-block'>
@@ -64,7 +67,8 @@ const Campaigns = () => {
                                 />
                                 <Stack mt='6' spacing='3'>
                                     <Heading size='md'>
-                                        {campaign.name} - by {campaign.artistName}
+                                        {campaign.campaignClosed && <Text className='font-semibold italic text-gray-500 text-sm'>Campaign finished</Text>}
+                                        {campaign.name}
                                         {!campaign.campaignClosed && campaign.isBoosted && <Text className='font-semibold italic text-orange-400 text-sm'>Boosted</Text>}
                                     </Heading>
                                     <Text className='w-full whitespace-nowrap overflow-hidden overflow-ellipsis'>{campaign.description}</Text>
@@ -86,4 +90,4 @@ const Campaigns = () => {
         </IsConnected>
     )
 }
-export default Campaigns;
+export default ArtistCampaigns;

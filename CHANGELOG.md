@@ -1,15 +1,22 @@
 # Changelog
 
-## 0.18.0 (2023-07-21)
+## 1.0.0 (2023-07-21)
 
-### feat: Implement `Footer` Component
+### feat: Implement `ArtistCampaigns` Component
 
-- Implement `Footer` Component
-- Update `Campaigns` page component when no campaigns
+- Implement `ArtistCampaigns` Component
+- Update `Campaigns` page component to remove finished campaign
 
 <details>
   <summary>See old changelog</summary>
 
+  ## 0.18.0 (2023-07-21)
+
+  ### feat: Implement `Footer` Component
+
+  - Implement `Footer` Component
+  - Update `Campaigns` page component when no campaigns
+    
   ## 0.17.2 (2023-07-21)
 
   ### fix: Fix errors in `CampaignManagement` and `Campaign` components
