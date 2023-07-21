@@ -46,9 +46,9 @@ const Campaign = ({ params }: { params: { campaignAddr: `0x${string}` } }) => {
     }
 
     useEffect(() => {
-        setInfoLoading(true)
-        setCampaignLoading(true)
+        const init: boolean = '' === campaign?.name
 
+        if (init) setCampaignLoading(true)
         if (isConnected) {
             getCampaignWithArtist(address as `0x${string}`, campaignAddr).then(
                 campaign => {
@@ -67,21 +67,20 @@ const Campaign = ({ params }: { params: { campaignAddr: `0x${string}` } }) => {
                     setIsArtist(address === campaign.artist)
 
                     if (0 === campaignTiersInfo.tiers.length && !campaign.campaignClosed) {
+                        if (init) setInfoLoading(true)
+                        const tiersInfo: CampaignTierInfo = { nbTiers: 0, tiers: [] }
                         readForContractByFunctionName<number>(campaignAddr, 'nbTiers', address as `0x${string}`).then(
-                            async nbTiers => {
-                                campaignTiersInfo.nbTiers = nbTiers
-                                campaignTiersInfo.tiers = []
+                            nbTiers => {
+                                tiersInfo.nbTiers = nbTiers
                                 for (let i = 1; i <= nbTiers; i++) {
-                                    await readForContractByFunctionName<string>(campaignAddr, 'uri', address as `0x${string}`, i).then(
-                                        async uri => await readForContractByFunctionName<number>(campaignAddr, 'getTierPrice', address as `0x${string}`, i).then(
-                                            price => campaignTiersInfo.tiers.push({ id: i, uri, price: Number(price) })
-                                        )
+                                    readForContractByFunctionName<number>(campaignAddr, 'getTierPrice', address as `0x${string}`, i).then(
+                                        price => tiersInfo.tiers.push({ id: i, price: Number(price) })
                                     )
                                 }
                             }
                         ).finally(() => {
-                            setCampaignTiersInfo(campaignTiersInfo)
-                            setInfoLoading(false)
+                            setCampaignTiersInfo(tiersInfo)
+                            if (init) setInfoLoading(false)
                         })
                     } else setInfoLoading(false)
                 }
@@ -89,7 +88,7 @@ const Campaign = ({ params }: { params: { campaignAddr: `0x${string}` } }) => {
             .catch(err => console.log(err))
             .finally(()=> setCampaignLoading(false))
         }
-    }, [campaignAddr, address, campaignTiersInfo, isConnected, logBoost, logWithdraw, logClosed, push, toast])
+    }, [campaignAddr, address, campaignTiersInfo, isConnected, logBoost, logWithdraw, logClosed, push, toast, campaign])
 
     useEffect(() => {
         setLoadingManagement(true)

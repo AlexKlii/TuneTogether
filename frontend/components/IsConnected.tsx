@@ -8,7 +8,7 @@ import { Text } from '@chakra-ui/react'
 import { userIsCampaignArtist } from '@/utils'
 
 import Loader from './Loader'
-import  AppLogo from './AppLogo'
+import AppLogo from './AppLogo'
 
 const IsConnected = ({ children, asArtist, campaignAddr }: {
     children: ReactNode,
@@ -31,8 +31,7 @@ const IsConnected = ({ children, asArtist, campaignAddr }: {
                     if (!isArtist && asArtist) push('/')
                     else setIsArtist(isArtist)
                 }
-            ).catch(() => push('/'))
-                .finally(() => setLoading(false))
+            ).catch(() => push('/')).finally(() => setLoading(false))
             else setLoading(false)
         } else if (pathName !== '/') push('/')
         else setLoading(false)
@@ -52,7 +51,7 @@ const IsConnected = ({ children, asArtist, campaignAddr }: {
                 :
                 <div className='flex flex-col mx-auto w-1/2 rounded h-auto text-center bg-gray-800 text-zinc-200 shadow-lg drop-shadow-lg border-gray-800 border p-5'>
                     <Text>
-                        Please connect you&apos;re wallet to access at <span className='inline-flex'><AppLogo textSize='text-md' pbSize='pb-0'/></span>
+                        Please connect your wallet to access at <span className='inline-flex'><AppLogo textSize='text-md' pbSize='pb-0'/></span>
                     </Text>
 
                     <div className='justify-center mx-auto h-auto mt-10'>

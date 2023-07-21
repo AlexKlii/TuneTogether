@@ -13,19 +13,20 @@ import { contractAddress, tuneTogetherAbi } from '@/constants'
 const Header = () => {
     const { address, isConnected } = useAccount()
     const [isArtist, setIsArtist] = useState(false)
+    const [artistCreated, setArtistCreated] = useState<`0x${string}`>()
 
     useContractEvent({
         address: contractAddress,
         abi: tuneTogetherAbi,
         eventName: 'ArtistCreated',
         listener(log: any) {
-            setIsArtist(log[0].args._artistAddr === address)
+            setArtistCreated(log[0].args._artistAddr)
         }
     })
 
     useEffect(() => {
         userIsArtist(address as `0x${string}`).then(isArtist => setIsArtist(isArtist))
-    }, [isConnected, address])
+    }, [isConnected, address, artistCreated])
 
     return (
         <header className='bg-gray-950 text-gray-100 border-gray-500 border-b'>
