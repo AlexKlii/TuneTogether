@@ -340,7 +340,6 @@ const CreateCampaign = () => {
                 isClosable: true,
             })
             push(`/campaigns/${campaignAddr}`)
-            setLoading(false)
         }
     })
 

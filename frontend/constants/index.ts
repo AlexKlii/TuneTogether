@@ -6,6 +6,9 @@ export const JWT = `Bearer ${process.env.NEXT_PUBLIC_PINATA_JWT}`
 export const alchemyId = `${process.env.NEXT_PUBLIC_ALCHEMY_ID}`
 
 export const CampaignAdded = 'event CampaignAdded(address _artistAddr, address _campaignAddr)'
+export const CampaignClosed = 'event CampaignClosed(uint256 _endTimestamp)'
+export const FundWithdraw = 'event FundWithdraw(address _artistAddr, uint _usdcBalance, uint _ethBalance, uint _timestamp)'
+export const Boosted = 'event Boosted(uint _timestamp)'
 
 
 /*************************************************************/

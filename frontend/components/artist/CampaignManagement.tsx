@@ -78,8 +78,7 @@ const CampaignManagement = ({ campaign, isLoading, usdcWithdrawn }: { campaign: 
 
     useEffect(() => {
         setLoading(isLoading)
-        if ((campaign.campaignClosed && !campaign.fundWithdrawn) || (!campaign.campaignClosed && 0 === campaign.boost)) setLoading(false)
-    }, [isLoading, campaign])
+    }, [isLoading, campaign, usdcWithdrawn])
 
     return (<>
         <h2 className='text-center text-3xl font-semibold pb-5 text-indigo-400'>Campaign Management</h2>
@@ -139,7 +138,7 @@ const CampaignManagement = ({ campaign, isLoading, usdcWithdrawn }: { campaign: 
                         <Heading size='md' color='green.700'>Withdraw Fund</Heading>
                     </CardHeader>
                     <CardBody>
-                        {usdcWithdrawn ?
+                        {usdcWithdrawn != undefined ?
                             <Box className='text-center'>
                                 <Text className='pl-5'>Campaign fund already withdrawn:</Text>
                                 <Text className='pt-5 pl-5 font-semibold italic'>{usdcWithdrawn} USDC Withdrawn</Text>
