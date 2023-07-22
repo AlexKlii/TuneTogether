@@ -83,6 +83,9 @@ npx hardhat run --network localhost scripts/deploy.ts
 
 # If you're in the test environment (Mumbai)
 npx hardhat run --network mumbai scripts/deploy.ts
+
+# OR
+npx hardhat run --network sepolia scripts/deploy.ts
 ```
 
 Modify your `.env` file in the `backend` directory with your local environment variables based on the network you have chosen.

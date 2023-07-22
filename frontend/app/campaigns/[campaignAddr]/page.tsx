@@ -31,17 +31,17 @@ const Campaign = ({ params }: { params: { campaignAddr: `0x${string}` } }) => {
     const [logBoost, setLogBoost] = useState<number>()
     const [logClosed, setLogClosed] = useState<number>()
     const [logWithdraw, setLogWithdraw] = useState<number>()
-    const [loadingManagement, setLoadingManagement] = useState(false)
+    const [loadingManagement, setLoadingManagement] = useState(true)
+    const [waitingMint, setWaitingMint] = useState(false)
 
     const campaignAddr = params.campaignAddr
 
     const approveAllowanceForMint = (id: number, price: number): void => {
-        setMintId(id)
         approveAllowance(address as `0x${string}`, campaignAddr, BigInt(price)).then(() => {
+            setMintId(id)
             setLoading(true)
         }).catch(() => {
             setLoading(false)
-            setMintId(0)
         })
     }
 
@@ -88,7 +88,7 @@ const Campaign = ({ params }: { params: { campaignAddr: `0x${string}` } }) => {
             .catch(err => console.log(err))
             .finally(()=> setCampaignLoading(false))
         }
-    }, [campaignAddr, address, campaignTiersInfo, isConnected, logBoost, logWithdraw, logClosed, push, toast, campaign])
+    }, [campaignAddr, address, campaignTiersInfo, isConnected, logBoost, logWithdraw, logClosed, push, toast, campaign?.name])
 
     useEffect(() => {
         setLoadingManagement(true)
@@ -112,10 +112,13 @@ const Campaign = ({ params }: { params: { campaignAddr: `0x${string}` } }) => {
     useEffect(() => {
         if (0 !== mintId && logOwner === address) {
             const id = mintId.toString()
+            setMintId(0)
             setLogOwner(undefined)
 
             // Mint NFT after allowance approval
-            writeForContractByFunctionName(campaignAddr, 'mint', id, '1').catch(err => {
+            writeForContractByFunctionName(campaignAddr, 'mint', id, '1')
+            .then(() => setWaitingMint(true))
+            .catch(err => {
                 setLoading(false)
                 toast({
                     title: 'An error occurred!',
@@ -129,7 +132,7 @@ const Campaign = ({ params }: { params: { campaignAddr: `0x${string}` } }) => {
     }, [mintId, logOwner, address, campaignAddr, toast])
 
     useEffect(() => {
-        if (mintId !== 0 && logMint === address) {
+        if (waitingMint && logMint === address) {
             toast({
                 title: 'Minted !',
                 description: 'Successfully minted! See your NFT in your wallet in a few moments.',
@@ -139,11 +142,12 @@ const Campaign = ({ params }: { params: { campaignAddr: `0x${string}` } }) => {
             })
 
             setLoading(false)
+            setWaitingMint(false)
             setMintId(0)
             setLogMint(undefined)
             setLogOwner(undefined)
         }
-    }, [address, logMint, toast, mintId])
+    }, [address, logMint, mintId, toast, waitingMint])
 
     useContractEvent({
         address: campaignAddr,

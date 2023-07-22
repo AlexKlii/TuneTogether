@@ -29,7 +29,7 @@ const Campaigns = () => {
                     ).catch(err =>
                         console.log(err)
                     ).finally(() => {
-                        setCampaigns(data.filter(campaign => !campaign.campaignClosed).sort((a, b) => b.boost - a.boost))
+                        setCampaigns(data.filter(campaign => !campaign.campaignClosed).sort((a) => a.isBoosted ? 1 : -1))
                         if (i === events.length-1) setLoading(false)
                     })
                 }

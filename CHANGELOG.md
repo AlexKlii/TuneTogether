@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.2 (2023-07-22)
+
+### fix: Some minor fixes
+
+- Fix default sort from `ArtistCampaigns` 
+- Fix mint method from `Campaign`
+
 ## 1.0.1 (2023-07-21)
 
 ### feat: Update `Home` page component

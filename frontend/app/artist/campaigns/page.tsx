@@ -42,7 +42,7 @@ const ArtistCampaigns = () => {
                     ).catch(err =>
                         console.log(err)
                     ).finally(() => {
-                        setCampaigns(data.sort((a, b) => b.endTimestamp - a.endTimestamp))
+                        setCampaigns(data.sort((a) => a.isBoosted ? 1 : -1).sort((a) => a.campaignClosed ? 1 : -1))
                         if (i === artist.campaigns.length-1) setLoading(false)
                     })
                 })
