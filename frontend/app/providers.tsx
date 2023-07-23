@@ -5,7 +5,7 @@ import * as React from 'react'
 import { connectorsForWallets, darkTheme, getDefaultWallets, RainbowKitProvider } from '@rainbow-me/rainbowkit'
 import { argentWallet, ledgerWallet, trustWallet } from '@rainbow-me/rainbowkit/wallets'
 import { configureChains, createConfig, WagmiConfig } from 'wagmi'
-import { hardhat, sepolia, polygonMumbai } from 'wagmi/chains'
+import { hardhat, sepolia, polygonMumbai, goerli } from 'wagmi/chains'
 import { publicProvider } from 'wagmi/providers/public'
 import { ChakraProvider, extendTheme } from '@chakra-ui/react'
 import { alchemyProvider } from 'wagmi/providers/alchemy'
@@ -14,6 +14,7 @@ import { alchemyId } from '@/constants'
 const { chains, publicClient, webSocketPublicClient } = configureChains(
     [
         sepolia,
+        goerli,
         polygonMumbai,
         ...(process.env.NEXT_PUBLIC_ENABLE_TESTNETS === 'true' ? [hardhat] : [])
     ],
