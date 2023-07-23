@@ -3,12 +3,13 @@ import { BaseError, ContractFunctionRevertedError, createPublicClient, http, par
 import { prepareWriteContract, writeContract, readContract } from '@wagmi/core'
 import { contractAddress, crowdfundingCampaignAbi, tuneTogetherAbi, JWT, network, genesisBlock, CampaignAdded, usdcAbi, uscdContractAddress, CampaignClosed, Boosted, FundWithdraw } from '@/constants'
 import { Artist } from '@/interfaces/Artist'
-import { hardhat, sepolia, polygonMumbai } from 'viem/chains'
+import { hardhat, sepolia, polygonMumbai, goerli } from 'viem/chains'
 import { Campaign, CampaignWithArtist } from '@/interfaces/Campaign'
 
 const usedNetwork = () => {
     switch (network) {
         case 'sepolia': return sepolia
+        case 'goerli': return goerli
         case 'hardhat': return hardhat
         case 'mumbai': return polygonMumbai
     }

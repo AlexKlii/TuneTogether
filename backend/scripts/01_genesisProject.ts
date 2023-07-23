@@ -29,7 +29,9 @@ async function main() {
   await usdc.waitForDeployment()
   const usdcAddr = await usdc.getAddress()
 
-  await usdc.faucet(investor.address, 420 * 10**6)
+  await usdc.faucet(artist.address, 420 * 10**6)
+  await usdc.faucet(investor.address, 2000 * 10**6)
+  await usdc.faucet(owner.address, 5000 * 10**6)
 
   console.log(`USDC deployed to ${usdcAddr}`)
 
@@ -96,7 +98,7 @@ async function main() {
     0,
     'TuneTogether',
     'TuneTogether Artist bio',
-    'ipfs://bafybeifs5oytiw5tq3d3wnzcnv5nnre5fqgpprgd7baybkdal3hruvuhlq/',
+    'ipfs://QmeB1ewDE8e7kd2Q5BFyRyvjEj9M1r1ZbHWNGKXEEGGCE8/',
     4,
     100*10**6
   )

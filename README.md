@@ -6,6 +6,7 @@ DApp and smart contract created by Alexandre Caliaro
 ## Resources 
 
 - [Vercel Deployment](https://tune-together.vercel.app) 
+- [Presentation video](https://www.youtube.com/watch?v=qKkz0OwCIAc)
 
 ### Technologies 
 
@@ -86,6 +87,9 @@ npx hardhat run --network mumbai scripts/deploy.ts
 
 # OR
 npx hardhat run --network sepolia scripts/deploy.ts
+
+# OR
+npx hardhat run --network goerli scripts/deploy.ts
 ```
 
 Modify your `.env` file in the `backend` directory with your local environment variables based on the network you have chosen.

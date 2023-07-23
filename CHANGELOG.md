@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.0.5 (2023-07-22)
+
+### feat: Implement goerli
+
+- Implement goerli in hardhat
+- Implement goerli in frontend
+- Fix boosted sort
+- Update `README.md`
+
 ## 1.0.4 (2023-07-22)
 
 ### fix: `CHANGLOG.md`
